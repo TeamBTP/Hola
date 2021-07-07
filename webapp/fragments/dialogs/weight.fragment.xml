@@ -1,0 +1,49 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form">
+    <Dialog id="idDialogWeight" title="{i18n>weightTitle}" contentWidth="auto" resizable="true" draggable="true">
+        <Panel>
+           <f:Form>
+                <f:layout>
+                    <f:ResponsiveGridLayout
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="12"
+                        labelSpanS="12"
+                        adjustLabelSpan="false"
+                        emptySpanXL="3"
+                        emptySpanL="3"
+                        emptySpanM="0"
+                        emptySpanS="0"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2"
+                        singleContainerFullSize="false" />
+                </f:layout>
+                <f:formContainers>
+                    <f:FormContainer>
+                        <f:formElements>
+                            <f:FormElement label="{i18n>weight}">
+                                <f:fields>
+                                    <Input value="{Info>/weight}" type="Number" />
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>um}">
+                                <f:fields>
+                                    <ComboBox id="idCBUm" selectedKey="{Info>/um}" >
+                                        <core:Item key="KG" text="KG" />
+                                        <core:Item key="TON" text="TON" />
+                                    </ComboBox>
+                                </f:fields>
+                            </f:FormElement>
+                        </f:formElements>
+                    </f:FormContainer>
+                </f:formContainers>
+            </f:Form>
+        </Panel>
+        <beginButton>
+            <Button text="{i18n>save}"  type="Accept" press="saveWeight"></Button>
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>close}"  type="Reject" press="closeDialog"></Button>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

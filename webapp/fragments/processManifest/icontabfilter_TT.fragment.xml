@@ -1,0 +1,68 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout"  >
+    <!--Tipo de Transporte -->
+    <IconTabFilter icon="sap-icon://hint" key="transportModel" >
+        <Page title="{i18n>titleTransport}" >
+            <headerContent>
+                <!-- Boton que guardara la opcion seleccionada y que avanzara al siguiente proceso -->
+                <Button icon="sap-icon://accept" type="Accept" text="{i18n>accept}" press="confirmTransport"/>
+            </headerContent>
+            <content>
+              
+                <Table xmlns="sap.ui.table" rows="{path: 'transportModel>/'}" enableColumnReordering="false" id="oTable" visibleRowCount="13" selectionMode="Single" rowSelectionChange="onLineItemSelected"  showNoData="true">
+                    <columns>  
+                        <Column width="auto"  hAlign="Center" sortProperty="EX_RESUID" filterProperty="EX_RESUID">
+                            <Label xmlns="sap.m" text="{i18n>resuid}"/>
+                            <template>
+                                <Text xmlns="sap.m" text="{transportModel>EX_RESUID}"/>
+                            </template>
+                        </Column>
+                        <Column width="auto"  hAlign="Center" sortProperty="EX_NAME" filterProperty="EX_NAME">
+                            <Label xmlns="sap.m" text="{i18n>name}"/>
+                            <template>
+                                <Text xmlns="sap.m" text="{transportModel>EX_NAME}"/>
+                            </template>
+                        </Column>
+                        <Column width="auto"  hAlign="Center" sortProperty="EX_NOINDIVRES" filterProperty="EX_NOINDIVRES">
+                            <Label xmlns="sap.m" text="{i18n>dimension_mass}"/>
+                            <template>
+                                <Text xmlns="sap.m" text="{transportModel>EX_NOINDIVRES}"/>
+                            </template>
+                        </Column>
+                        <Column width="auto"  hAlign="Center" sortProperty="EX_NOINDIVRES2" filterProperty="EX_NOINDIVRES2">
+                            <Label xmlns="sap.m" text="{i18n>dimension_volume}"/>
+                            <template>
+                                <Text xmlns="sap.m" text="{transportModel>EX_NOINDIVRES2}"/>
+                            </template>
+                        </Column>
+                    </columns>
+                </Table>   
+                <Table id="idTableTransport" visible="false" noDataText="{i18n>noDetailGuide}" fixedLayout="false" alternateRowColors="true" items="{transportModel>/}" mode="SingleSelectLeft">
+                    <columns>
+                        <Column>
+                            <Text text="{i18n>resuid}" />
+                        </Column>
+                        <Column>
+                            <Text text="{i18n>name}" />
+                        </Column>
+                        <Column>
+                            <Text text="{i18n>dimension_mass}" />
+                        </Column>
+                        <Column>
+                            <Text text="{i18n>dimension_volume}" />
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{transportModel>EX_RESUID}"/>
+                                <Text text="{transportModel>EX_NAME}"/>
+                                <Text text="{transportModel>EX_NOINDIVRES} {transportModel>EX_NOINDIVRES_UNIT}"/>
+                                <Text text="{transportModel>EX_NOINDIVRES2} {transportModel>EX_NOINDIVRES_UNIT2}"></Text>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </content>
+        </Page>
+    </IconTabFilter>
+</core:FragmentDefinition>

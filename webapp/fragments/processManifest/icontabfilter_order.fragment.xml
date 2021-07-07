@@ -1,0 +1,87 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
+    <!-- Orden de Envio que contiene los Bultos creados -->
+    <IconTabFilter
+        icon="sap-icon://shipping-status"
+        key="orderModel"
+        count="{Info>/countPallets}"
+        >
+        <Page id="orderPage" title="{i18n>order}" >
+            <headerContent> 
+                   <!-- Peso total de la orden en base a todos los bultos agregados -->
+                <Text class="sapUiLargeMarginEnd" text="{i18n>totalWeight} = {Info>/totalWeight} {i18n>unitWeight}"/>
+                <Button icon="sap-icon://accept" press="cerrarOrder" type="Accept" text="{i18n>closeOrder}"/>
+            </headerContent>
+            <content>
+                <!-- Lista de Bultos agregados en la orden, cada bulto esta en un panel  -->
+                <List items="{orderModel>/pallets}" updateFinished="refresh">
+                    <items>
+                        <CustomListItem >
+                            <!-- Por cada Item en la propiedad items de List se creara un Panel (Bulto) -->
+                            <Panel expandable="true" expanded="false">
+                                <headerToolbar>
+                                    <OverflowToolbar>
+                                        <Title text="{i18n>titlePanels} {orderModel>codBulto}"/>
+                                        <ToolbarSpacer />
+                                        <Text text="{i18n>weight}: {orderModel>weight} {orderModel>um} -" />
+                                        <Text text="{i18n>countItems}: {orderModel>countItems}" />                      
+                                    </OverflowToolbar>
+                                </headerToolbar>
+                                <!-- Tabla - Detalle de un Bulto -->
+                                <Table items="{orderModel>detail/}" fixedLayout="false" alternateRowColors="true">
+                                    <columns>
+                                        <Column >
+                                            <Text text="{i18n>deliveryOrders}" />
+                                        </Column>
+                                        <Column >
+                                            <Text text="{i18n>proveedor}" />
+                                        </Column>
+                                        <Column >
+                                            <Text text="{i18n>fecha}" />
+                                        </Column>
+                                        <Column >
+                                            <Text text="{i18n>item}" />
+                                        </Column>
+                                        <Column >
+                                            <Text text="{i18n>cod_material}" />
+                                        </Column>
+                                        <Column >
+                                            <Text text="{i18n>descrip}" />
+                                        </Column>
+                                        <Column >
+                                            <Text text="{i18n>cant}" />
+                                        </Column>
+                                        <Column >
+                                            <Text text="{i18n>precio}" />
+                                        </Column>
+                                        <Column >
+                                            <Text text="{i18n>ceco}" />
+                                        </Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem >
+                                            <cells>
+                                                <Text text="{orderModel>deliveryOrders}"/>
+                                                <Text text="{orderModel>proveedor}"/>
+                                                <Text text="{orderModel>fecha}"/>
+                                                <Text text="{orderModel>Item}"/>
+                                                <Text text="{orderModel>Codigo_materia}"/>
+                                                <Text text="{orderModel>Descripcion}"/>
+                                                <ObjectNumber
+                                                    number="{path:'orderModel>Cantidad'}"
+                                                    unit="{orderModel>UM}" />
+                                                <ObjectNumber
+                                                    number="{path:'orderModel>Precio'}"
+                                                    unit="{orderModel>Moneda}" />
+                                                <Text text="{orderModel>Ceco}"></Text>
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </Panel>
+                        </CustomListItem>
+                    </items>
+                </List>
+            </content>
+        </Page>
+    </IconTabFilter>
+</core:FragmentDefinition>

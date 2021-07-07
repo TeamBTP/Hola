@@ -1,0 +1,37 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:form="sap.ui.layout.form" fragmentName='Dialog2'>
+
+    <Dialog id="idDialogFiltro2"
+            title="Example Filtro 2"
+    >
+           <form:SimpleForm  id="simpleForm">
+                
+            <!-- <Label text="Color"></Label>
+           <ComboBox 	id="idComboBoxColor"
+						items="{modelExample>/}"
+            >
+            <core:Item key="{modelExample>Color}" text="{modelExample>Color}"/>
+            </ComboBox>
+           
+           <Label text="Animal"></Label>
+           <ComboBox 	id="idComboBoxAnimal"
+						items="{modelExample>/}"
+            >
+            <core:Item key="{modelExample>Animal}" text="{modelExample>Animal}"/>
+            </ComboBox>
+           <Label text="Planta"></Label>
+           <ComboBox 	id="idComboBoxPlanta"
+						items="{modelExample>/}"
+            >
+            <core:Item key="{modelExample>Planta}" text="{modelExample>Planta}"/>
+            </ComboBox> -->
+           </form:SimpleForm>
+        
+        <OverflowToolbar >
+            <ToolbarSpacer/>
+            <Button text="Aceptar" press="onConfirm" type="Accept"/>
+            <Button text="Cancelar" press="onCloseDialog" type="Reject"/>
+        </OverflowToolbar>
+        
+    </Dialog>
+
+</core:FragmentDefinition>

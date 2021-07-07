@@ -1,0 +1,105 @@
+[
+    {
+        "Proveedor": "Itron, Inc.",
+        "Numero_guia": "GDD-0858026643",
+        "Fecha": "7/6/2020",
+        "Procesada": true,
+        "detail": [{"Item":1,"Codigo_materia":"AM 299407580","Descripcion":"Assimilated systemic solution","Cantidad":"10","UM":"UN","Precio":7208.4,"Moneda":"PEN","Ceco":"39"},
+                    {"Item":2,"Codigo_materia":"AM 306124963","Descripcion":"Robust 4th generation capability","Cantidad":"5","UM":"UN","Precio":6593.2,"Moneda":"PEN","Ceco":"176"},
+                    {"Item":3,"Codigo_materia":"AM 086736803","Descripcion":"Robust non-volatile encryption","Cantidad":"20","UM":"UN","Precio":8085.1,"Moneda":"PEN","Ceco":"8846"},
+                    {"Item":4,"Codigo_materia":"AM 029558716","Descripcion":"Inverse local task-force","Cantidad":"30","UM":"UN","Precio":5766.5,"Moneda":"PEN","Ceco":"7"},
+                    {"Item":5,"Codigo_materia":"AM 158414652","Descripcion":"Grass-roots user-facing installation","Cantidad":"40","UM":"UN","Precio":8451.9,"Moneda":"PEN","Ceco":"417"},
+                    {"Item":6,"Codigo_materia":"AM 457610578","Descripcion":"Distributed interactive structure","Cantidad":"50","UM":"UN","Precio":4981.8,"Moneda":"PEN","Ceco":"663"},
+                    {"Item":7,"Codigo_materia":"AM 441591371","Descripcion":"Integrated executive forecast","Cantidad":"15","UM":"UN","Precio":1387.0,"Moneda":"PEN","Ceco":"42"},
+                    {"Item":8,"Codigo_materia":"AM 322791548","Descripcion":"Configurable full-range help-desk","Cantidad":"8","UM":"UN","Precio":6573.7,"Moneda":"PEN","Ceco":"8301"}]
+    },
+    {
+        "Proveedor": "Vornado Realty Trust",
+        "Numero_guia": "GDD-1624050476",
+        "Fecha": "10/22/2020",
+        "Procesada": true,
+        "detail" : [{"Item":12,"Codigo_materia":"AM 044799967","Descripcion":"Versatile transitional model","Cantidad":"10","UM":"UN","Precio":623.8,"Moneda":"PEN","Ceco":"87"},
+                    {"Item":13,"Codigo_materia":"AM 730100590","Descripcion":"Fully-configurable non-volatile flexibility","Cantidad":"30","UM":"UN","Precio":8578.4,"Moneda":"PEN","Ceco":"3521"},
+                    {"Item":14,"Codigo_materia":"AM 213073663","Descripcion":"Persevering non-volatile projection","Cantidad":"25","UM":"UN","Precio":6546.9,"Moneda":"PEN","Ceco":"8972"}]
+    },
+    {
+        "Proveedor": "MiX Telematics Limited",
+        "Numero_guia": "GDD-9880652878",
+        "Fecha": "5/28/2020",
+        "Procesada": false,
+        "detail" : [{"Item":15,"Codigo_materia":"AM 258943371","Descripcion":"Seamless heuristic benchmark","Cantidad":"20","UM":"UN","Precio":2428.9,"Moneda":"PEN","Ceco":"2381"},
+                    {"Item":16,"Codigo_materia":"AM 601497765","Descripcion":"Grass-roots coherent toolset","Cantidad":"20","UM":"UN","Precio":8199.7,"Moneda":"PEN","Ceco":"366"},
+                    {"Item":17,"Codigo_materia":"AM 617132979","Descripcion":"Ergonomic asynchronous forecast","Cantidad":"20","UM":"UN","Precio":7840.6,"Moneda":"PEN","Ceco":"882"},
+                    {"Item":18,"Codigo_materia":"AM 715785490","Descripcion":"Cross-group 24 hour product","Cantidad":"20","UM":"UN","Precio":1198.3,"Moneda":"PEN","Ceco":"5"},
+                    {"Item":19,"Codigo_materia":"AM 138004529","Descripcion":"Operative zero administration archive","Cantidad":"10","UM":"UN","Precio":8592.9,"Moneda":"PEN","Ceco":"00579"},
+                    {"Item":20,"Codigo_materia":"AM 335940626","Descripcion":"Reduced object-oriented middleware","Cantidad":"7","UM":"UN","Precio":5720.8,"Moneda":"PEN","Ceco":"973"}]
+    },
+    {
+        "Proveedor": "Scorpio Bulkers Inc.",
+        "Numero_guia": "GDD-0368128032",
+        "Fecha": "5/17/2020",
+        "Procesada": true,
+        "detail" : [{"Item":9,"Codigo_materia":"AM 059442452","Descripcion":"Quality-focused system-worthy monitoring","Cantidad":"10","UM":"UN","Precio":6870.1,"Moneda":"PEN","Ceco":"6"},
+                    {"Item":10,"Codigo_materia":"AM 086273219","Descripcion":"Re-contextualized leading edge standardization","Cantidad":"10","UM":"UN","Precio":5464.6,"Moneda":"PEN","Ceco":"4"},
+                    {"Item":11,"Codigo_materia":"AM 727461002","Descripcion":"Robust global benchmark","Cantidad":"10","UM":"UN","Precio":3507.3,"Moneda":"PEN","Ceco":"47"},
+                    {"Item":12,"Codigo_materia":"AM 044799967","Descripcion":"Versatile transitional model","Cantidad":"10","UM":"UN","Precio":623.8,"Moneda":"PEN","Ceco":"87"}]
+    },
+    {
+        "Proveedor": "AAON, Inc.",
+        "Numero_guia": "GDD-7423409898",
+        "Fecha": "5/25/2020",
+        "Procesada": true,
+        "detail" : [{"Item":6,"Codigo_materia":"AM 457610578","Descripcion":"Distributed interactive structure","Cantidad":"50","UM":"UN","Precio":4981.8,"Moneda":"PEN","Ceco":"663"},
+                    {"Item":7,"Codigo_materia":"AM 441591371","Descripcion":"Integrated executive forecast","Cantidad":"15","UM":"UN","Precio":1387.0,"Moneda":"PEN","Ceco":"42"},
+                    {"Item":8,"Codigo_materia":"AM 322791548","Descripcion":"Configurable full-range help-desk","Cantidad":"8","UM":"UN","Precio":6573.7,"Moneda":"PEN","Ceco":"8301"},
+                    {"Item":9,"Codigo_materia":"AM 059442452","Descripcion":"Quality-focused system-worthy monitoring","Cantidad":"10","UM":"UN","Precio":6870.1,"Moneda":"PEN","Ceco":"6"}]
+    },
+    {
+        "Proveedor": "Ericsson",
+        "Numero_guia": "GDD-1717638287",
+        "Fecha": "3/16/2021",
+        "Procesada": false,
+        "detail" : [{"Item":6,"Codigo_materia":"AM 457610578","Descripcion":"Distributed interactive structure","Cantidad":"50","UM":"UN","Precio":4981.8,"Moneda":"PEN","Ceco":"663"},
+                    {"Item":10,"Codigo_materia":"AM 086273219","Descripcion":"Re-contextualized leading edge standardization","Cantidad":"10","UM":"UN","Precio":5464.6,"Moneda":"PEN","Ceco":"4"},
+                    {"Item":11,"Codigo_materia":"AM 727461002","Descripcion":"Robust global benchmark","Cantidad":"10","UM":"UN","Precio":3507.3,"Moneda":"PEN","Ceco":"47"},
+                    {"Item":12,"Codigo_materia":"AM 044799967","Descripcion":"Versatile transitional model","Cantidad":"10","UM":"UN","Precio":623.8,"Moneda":"PEN","Ceco":"87"}]
+    },
+    {
+        "Proveedor": "Goldman Sachs Group, Inc. (The)",
+        "Numero_guia": "GDD-6259998759",
+        "Fecha": "10/27/2020",
+        "Procesada": true,
+        "detail" : [{"Item":7,"Codigo_materia":"AM 441591371","Descripcion":"Integrated executive forecast","Cantidad":"15","UM":"UN","Precio":1387.0,"Moneda":"PEN","Ceco":"42"},
+                    {"Item":8,"Codigo_materia":"AM 322791548","Descripcion":"Configurable full-range help-desk","Cantidad":"8","UM":"UN","Precio":6573.7,"Moneda":"PEN","Ceco":"8301"},
+                    {"Item":9,"Codigo_materia":"AM 059442452","Descripcion":"Quality-focused system-worthy monitoring","Cantidad":"10","UM":"UN","Precio":6870.1,"Moneda":"PEN","Ceco":"6"}]
+    },
+    {
+        "Proveedor": "Allstate Corporation (The)",
+        "Numero_guia": "GDD-4582928420",
+        "Fecha": "5/9/2020",
+        "Procesada": true,
+        "detail" : [{"Item":2,"Codigo_materia":"AM 306124963","Descripcion":"Robust 4th generation capability","Cantidad":"5","UM":"UN","Precio":6593.2,"Moneda":"PEN","Ceco":"176"},
+                    {"Item":3,"Codigo_materia":"AM 086736803","Descripcion":"Robust non-volatile encryption","Cantidad":"20","UM":"UN","Precio":8085.1,"Moneda":"PEN","Ceco":"8846"},
+                    {"Item":19,"Codigo_materia":"AM 138004529","Descripcion":"Operative zero administration archive","Cantidad":"10","UM":"UN","Precio":8592.9,"Moneda":"PEN","Ceco":"00579"},
+                    {"Item":20,"Codigo_materia":"AM 335940626","Descripcion":"Reduced object-oriented middleware","Cantidad":"7","UM":"UN","Precio":5720.8,"Moneda":"PEN","Ceco":"973"}]
+    },
+    {
+        "Proveedor": "Tractor Supply Company",
+        "Numero_guia": "GDD-3718855623",
+        "Fecha": "2/1/2021",
+        "Procesada": true,
+        "detail" : [{"Item":4,"Codigo_materia":"AM 029558716","Descripcion":"Inverse local task-force","Cantidad":"30","UM":"UN","Precio":5766.5,"Moneda":"PEN","Ceco":"7"},
+                    {"Item":5,"Codigo_materia":"AM 158414652","Descripcion":"Grass-roots user-facing installation","Cantidad":"40","UM":"UN","Precio":8451.9,"Moneda":"PEN","Ceco":"417"},
+                    {"Item":15,"Codigo_materia":"AM 258943371","Descripcion":"Seamless heuristic benchmark","Cantidad":"20","UM":"UN","Precio":2428.9,"Moneda":"PEN","Ceco":"2381"},
+                    {"Item":16,"Codigo_materia":"AM 601497765","Descripcion":"Grass-roots coherent toolset","Cantidad":"20","UM":"UN","Precio":8199.7,"Moneda":"PEN","Ceco":"366"}]
+    },
+    {
+        "Proveedor": "Technical Communications Corporation",
+        "Numero_guia": "GDD-4205554796",
+        "Fecha": "8/19/2020",
+        "Procesada": true,
+        "detail" : [{"Item":15,"Codigo_materia":"AM 258943371","Descripcion":"Seamless heuristic benchmark","Cantidad":"20","UM":"UN","Precio":2428.9,"Moneda":"PEN","Ceco":"2381"},
+                    {"Item":16,"Codigo_materia":"AM 601497765","Descripcion":"Grass-roots coherent toolset","Cantidad":"20","UM":"UN","Precio":8199.7,"Moneda":"PEN","Ceco":"366"},
+                    {"Item":1,"Codigo_materia":"AM 299407580","Descripcion":"Assimilated systemic solution","Cantidad":"10","UM":"UN","Precio":7208.4,"Moneda":"PEN","Ceco":"39"}]
+    }
+]

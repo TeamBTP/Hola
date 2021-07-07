@@ -1,0 +1,73 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form">
+    <!-- Información del Transportitas -->
+    <IconTabFilter icon="sap-icon://customer-order-entry" key="infoTModel" >
+        <Page title="{i18n>titleInfoT}" >
+            <Panel >
+                <headerToolbar>
+                    <OverflowToolbar >
+                        <ToolbarSpacer />
+                        <Text text="{i18n>typetransport}: {Info>/transport/name}" />
+                        <ToolbarSpacer />
+                        <Text text="{i18n>countBultos}: {Info>/countPallets}" />
+                        <ToolbarSpacer />
+                        <Text text="{i18n>totalWeight}: {Info>/totalWeight} {i18n>unitWeight}" />
+                        <ToolbarSpacer />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <content>
+                    <VBox justifyContent="Center" alignContent="Center" alignItems="Center"> 
+                        <f:Form>
+                            <f:layout>
+                                <f:ResponsiveGridLayout
+                                    labelSpanXL="4"
+                                    labelSpanL="4"
+                                    labelSpanM="12"
+                                    labelSpanS="12"
+                                    adjustLabelSpan="false"
+                                    emptySpanXL="3"
+                                    emptySpanL="3"
+                                    emptySpanM="0"
+                                    emptySpanS="0"
+                                    columnsXL="2"
+                                    columnsL="2"
+                                    columnsM="2"
+                                    singleContainerFullSize="false" />
+                            </f:layout>
+                            <f:formContainers>
+                                <f:FormContainer>
+                                    <f:formElements>
+                                        <f:FormElement label="{i18n>carrier}">
+                                            <f:fields>
+                                                <ComboBox selectedKey="{Info>/um}" >
+                                                    
+                                                </ComboBox>
+                                            </f:fields>
+                                        </f:FormElement>
+                                        <f:FormElement label="{i18n>licenseplate}">
+                                            <f:fields>
+                                                <ComboBox selectedKey="{Info>/um}" >
+                                                    
+                                                </ComboBox>
+                                            </f:fields>
+                                        </f:FormElement>
+                                        <f:FormElement label="{i18n>license}">
+                                            <f:fields>
+                                                <Input />
+                                            </f:fields>
+                                        </f:FormElement>
+                                        <f:FormElement label="{i18n>route}">
+                                            <f:fields>
+                                                <Input />
+                                            </f:fields>
+                                        </f:FormElement>
+                                    </f:formElements>
+                                </f:FormContainer>
+                            </f:formContainers>
+                        </f:Form>
+                        <Button icon="sap-icon://complete" press="createOrder" type="Accept" text="{i18n>complete}"/>
+                    </VBox>
+                </content>
+            </Panel>
+        </Page>
+    </IconTabFilter>
+</core:FragmentDefinition>

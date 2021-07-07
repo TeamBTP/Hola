@@ -1,0 +1,44 @@
+[
+    {
+        "cod": "001",
+        "name": "Camion Rigido C2",
+        "axis": "2",
+        "weightMax": "18"
+    },
+    {
+        "cod": "002",
+        "name": "Camion Rigido C3",
+        "axis": "3",
+        "weightMax": "25"
+    },
+    {
+        "cod": "003",
+        "name": "Camion Rigido C4",
+        "axis": "4",
+        "weightMax": "30"
+    },
+    {
+        "cod": "004",
+        "name": "Tractocamion C2S1",
+        "axis": "2 / 1",
+        "weightMax": "29"
+    },
+    {
+        "cod": "005",
+        "name": "Tractocamion C2S2",
+        "axis": "2 / 2",
+        "weightMax": "36"
+    },
+    {
+        "cod": "006",
+        "name": "Tractocamion C3S1",
+        "axis": "3 / 1",
+        "weightMax": "36"
+    },
+    {
+        "cod": "007",
+        "name": "Tractocamion C3S2",
+        "axis": "3 / 2",
+        "weightMax": "43"
+    }
+]

@@ -1,0 +1,93 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
+    <!-- Nuevo Bulto y sus respectivos items -->
+    <IconTabFilter
+        icon="sap-icon://product"
+        key="pallet"
+        count="{Info>/countItems}">
+        <!-- por completar title -->
+        <Page title="{i18n>titleBulto}" >
+            <headerContent>
+                <!-- Botones de Crear Bulto y eliminar items de un Bulto -->
+                <Button icon="sap-icon://add-product" id="idButtonCreatePallet" press="createPallet" type="Accept" text="{i18n>createBulto}"/>
+                <Button icon="sap-icon://delete" id="idButtonDelete" press="delete" type="Reject" text="{i18n>enableDelete}"/>
+            </headerContent>
+            <content>
+                <!-- Tabla de los items que contiene el Bulto a crear -->
+                <Table id="idTableItems" class="sapUiLargeMarginBottom" noDataText="No items added" items="{palletModel>/items/}">
+                    <!-- Cabezeras de la tabla -->
+                    <columns>
+                        <Column >
+                            <Text text="{i18n>deliveryOrders}" />
+                        </Column>
+                        <Column >
+                            <Text text="{i18n>proveedor}" />
+                        </Column>
+                        <Column >
+                            <Text text="{i18n>fecha}" />
+                        </Column>
+                        <Column >
+                            <Text text="{i18n>item}" />
+                        </Column>
+                        <Column >
+                            <Text text="{i18n>descrip}" />
+                        </Column>
+                        <Column >
+                            <Text text="{i18n>cant}" />
+                        </Column>
+                        <Column >
+                            <Text text="{i18n>precio}" />
+                        </Column>
+                        <Column >
+                            <Text text="{i18n>ceco}" />
+                        </Column>
+                        <!-- Columna de Eliminar item que se ocultara dependiendo de lo que desee el usuario -->
+                        <Column id="idColumnAction" visible="false"> 
+                            <Text text="{i18n>action}" />
+                        </Column>
+                    </columns>
+                    <!-- Filas de la tabla, se hace una por cada item del array entregado en la propiedad "items" de Table -->
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{palletModel>deliveryOrders}"/>
+                                <Text text="{palletModel>proveedor}"/>
+                                <Text text="{palletModel>fecha}"/>
+                                <Text text="{palletModel>Item}"/>
+                                <Text text="{palletModel>Descripcion}"/>
+                                <ObjectNumber
+                                    number="{path:'palletModel>Cantidad'}"
+                                    unit="{palletModel>UM}" />
+                                <ObjectNumber
+                                    number="{path:'palletModel>Precio'}"
+                                    unit="{palletModel>Moneda}" />
+                                <Text text="{palletModel>Ceco}"></Text>
+                                <!-- Boton para Eliminar item del Bulto -->
+                                <Button icon="sap-icon://less" press="deleteGD" type="Reject"></Button>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </content>
+            <!-- Informacion sobre el estado del camion -->
+            <footer>
+                <OverflowToolbar >
+                    <Text class="sapUiSmallMargin" text="{i18n>infoTransport}"  />
+                    <ToolbarSpacer/>
+                    <ObjectStatus
+                        class="sapUiSmallMargin"
+                        text="{i18n>actualWeight}: {Info>/totalWeight} {i18n>unitWeight}"
+                        state="Indication04" />
+                        <ToolbarSeparator>
+                            <layoutData>
+                                <OverflowToolbarLayoutData group="2"/>
+                            </layoutData>
+                        </ToolbarSeparator>
+                    <ObjectStatus
+                        class="sapUiSmallMargin"
+                        text="{i18n>maxWeight}: {Info>/transport/EX_NOINDIVRES} {Info>/transport/EX_NOINDIVRES_UNIT}"
+                        state="Information" />
+                </OverflowToolbar>
+            </footer>
+        </Page>
+    </IconTabFilter>
+</core:FragmentDefinition>
