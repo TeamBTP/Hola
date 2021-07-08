@@ -6,7 +6,7 @@
                 <headerToolbar>
                     <OverflowToolbar >
                         <ToolbarSpacer />
-                        <Text text="{i18n>typetransport}: {Info>/transport/name}" />
+                        <Text text="{i18n>typetransport}: {Info>/transport/EX_NAME}" />
                         <ToolbarSpacer />
                         <Text text="{i18n>countBultos}: {Info>/countPallets}" />
                         <ToolbarSpacer />

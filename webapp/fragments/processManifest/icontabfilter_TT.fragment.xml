@@ -8,8 +8,14 @@
             </headerContent>
             <content>
               
-                <Table xmlns="sap.ui.table" rows="{path: 'transportModel>/'}" enableColumnReordering="false" id="oTable" visibleRowCount="13" selectionMode="Single" rowSelectionChange="onLineItemSelected"  showNoData="true">
-                    <columns>  
+                <Table xmlns="sap.ui.table" rows="{path: 'transportModel>/'}" enableColumnReordering="false" id="idTableTransport" visibleRowCount="13" selectionMode="None" rowSelectionChange="onLineItemSelected"  showNoData="true">
+                    <columns>
+                        <Column width="120px" hAlign="Center">
+                            <!-- <CheckBox id="oCheckBoxAll" xmlns="sap.m" select="selectAllCheckBox"/> -->
+                            <template>
+                                <CheckBox xmlns="sap.m" selected="false" select="checked"/>
+                            </template>
+                        </Column>
                         <Column width="auto"  hAlign="Center" sortProperty="EX_RESUID" filterProperty="EX_RESUID">
                             <Label xmlns="sap.m" text="{i18n>resuid}"/>
                             <template>
@@ -25,18 +31,18 @@
                         <Column width="auto"  hAlign="Center" sortProperty="EX_NOINDIVRES" filterProperty="EX_NOINDIVRES">
                             <Label xmlns="sap.m" text="{i18n>dimension_mass}"/>
                             <template>
-                                <Text xmlns="sap.m" text="{transportModel>EX_NOINDIVRES}"/>
+                                <Text xmlns="sap.m" text="{transportModel>EX_NOINDIVRES} {transportModel>EX_NOINDIVRES_UNIT}"/>
                             </template>
                         </Column>
                         <Column width="auto"  hAlign="Center" sortProperty="EX_NOINDIVRES2" filterProperty="EX_NOINDIVRES2">
                             <Label xmlns="sap.m" text="{i18n>dimension_volume}"/>
                             <template>
-                                <Text xmlns="sap.m" text="{transportModel>EX_NOINDIVRES2}"/>
+                                <Text xmlns="sap.m" text="{transportModel>EX_NOINDIVRES2} {transportModel>EX_NOINDIVRES_UNIT2}"/>
                             </template>
                         </Column>
                     </columns>
                 </Table>   
-                <Table id="idTableTransport" visible="false" noDataText="{i18n>noDetailGuide}" fixedLayout="false" alternateRowColors="true" items="{transportModel>/}" mode="SingleSelectLeft">
+                <Table id="idTableTransport2" visible="false" noDataText="{i18n>noDetailGuide}" fixedLayout="false" alternateRowColors="true" items="{transportModel>/}" mode="SingleSelectLeft">
                     <columns>
                         <Column>
                             <Text text="{i18n>resuid}" />

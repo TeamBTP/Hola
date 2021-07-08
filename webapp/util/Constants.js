@@ -42,7 +42,8 @@ sap.ui.define([
                     property4: "/um",
                     property5: "/weight",
                     property6: "/transport",
-                    property7: "/transport/weightMax"
+                    property7: "/transport/EX_NOINDIVRES",
+                    property8: "/pathTransport"
                 },
                 palletModel: {
                     property1: "/items"

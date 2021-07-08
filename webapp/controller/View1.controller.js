@@ -17,6 +17,9 @@ sap.ui.define([
 
 		return Controller.extend("tmsmanifest.tmsmanifest.controller.View1", {
 			onInit: function () {
+                this.oLoader = new sap.m.BusyDialog({
+                    showCancelButton: false
+                });
                 //Array de dialogs, aqui se guardaran todos los dialogs que usaremos para no tener que crearlos cada vez que se llamen
                 this.Dialogs = {}
                 //Aqui se guardara el dialog que se este usando en ese momento en la App
@@ -36,6 +39,7 @@ sap.ui.define([
                 this.getOwnerComponent().setModel(oModel, Constants.model.palletModel);
                 //Se crea y guarda el modelo que contendra informacion util para distintas partes de la app
                 let oInfo = {
+                    pathTransport: "",
                     transport: "",
                     countItems: 0,
                     countPallets: 0,
@@ -59,8 +63,10 @@ sap.ui.define([
 
             //Funcion encargada de obtener la data (tipo de transportes) desde el servicio de ERP la cual es guardada en un modelo 
             getTransportType: function () {
+                let sLoadingText = this.getView().getModel("i18n").getProperty("loading")
+                this.oLoader.setTitle(sLoadingText);
+			    this.oLoader.open();
                 var oController = this;
-
                 var model = oController.getOwnerComponent().getModel("MODEL_ZTM_CARGO_MANIFEST_SRV");
                 var service = "/ZTM_CM_RESOURCESet";
                 var filters = []
@@ -90,6 +96,7 @@ sap.ui.define([
                         });                        
                         let oModel = new JSONModel(oData);                        
                         oController.getOwnerComponent().setModel(oModel, Constants.model.transportModel);
+                        oController.oLoader.close();
                         resolve(data);
                     }).catch((e) => {
                         //Response Error
@@ -146,6 +153,23 @@ sap.ui.define([
                 this.getOwnerComponent().getModel(Constants.model.guideModel).setData(oGDSeleccionado);
                 this.validateSelected();
             },
+            //Funcion que verifica que solo se seleccione un tipo de transporte y guarda en caso de seleccionar uno
+            checked: function (oEvent) {
+                let check = oEvent.getSource().getSelected();
+                let oBindingContext = oEvent.getSource().getBindingContext(Constants.model.transportModel);
+                let sFragmentId = this.getView().createId(Constants.ids.icontabfilter_TT.id);
+                let oTable = sap.ui.core.Fragment.byId(sFragmentId, Constants.ids.icontabfilter_TT.tableTransport);
+                if (check) {
+                    //Se recorre los items de la tabla para limpiar los checkbox y que solo hay auno seleccionado
+                    oTable.getRows().forEach(row => {
+                        if (row.getCells()[0].getSelected() == true && row.getCells()[0].getBindingContext(Constants.model.transportModel) != oBindingContext) {
+                            row.getCells()[0].setSelected(false);
+                        }
+                    });
+                    this.getView().getModel(Constants.model.infoModel).setProperty(Constants.properties.infoModel.property8, oBindingContext.getPath());
+                }
+
+            },                                
             //Funcion que se usa para la busqueda en la lista de guias de despacho, la cual busca tanto por Proveedor (filter1),
             //numero_guia (filter2) y fecha de la guia (filter3)
             onSearch: function (oEvent) {
@@ -474,22 +498,15 @@ sap.ui.define([
                     tab.setSelectedKey(Constants.model.orderModel);
                 }
             },
-
+            //Funcion que se activa al confirmar el tipo de transporte, seteando los datos del camion y validacion del peso maximo 
             confirmTransport: function (oEvent) {
-                let sFragmentId = this.getView().createId(Constants.ids.icontabfilter_TT.id);
-                let oTable = sap.ui.core.Fragment.byId(sFragmentId, Constants.ids.icontabfilter_TT.tableTransport);
-                let oBindingContext = oTable.getSelectedItem().getBindingContext(Constants.model.transportModel);
                 let oModel = this.getOwnerComponent().getModel(Constants.model.transportModel);
-                let oTransport = oModel.getProperty(oBindingContext.getPath());
-                oModel = this.getView().getModel(Constants.model.infoModel);
-                oModel.setProperty(Constants.properties.infoModel.property6, oTransport);
-                oTable.getItems().forEach(item => {
-                    let idRadioButton = item.$().find('.sapMRb').attr('id');
-                    sap.ui.getCore().byId(idRadioButton).setEditable(false);
-                });
+                let sPath = this.getView().getModel(Constants.model.infoModel).getProperty(Constants.properties.infoModel.property8);
+                let oTransportSelected = oModel.getProperty(sPath);
+                this.getView().getModel(Constants.model.infoModel).setProperty(Constants.properties.infoModel.property6, oTransportSelected);
                 let tab = this.byId(Constants.ids.mainView.iconTabBar);
+                //Se avanza al siguiente proceso de los icontabbar
                 tab.setSelectedKey(Constants.model.gdModel);
-                oEvent.getSource().setVisible(false)
             },
 
             cerrarOrder: function () {
