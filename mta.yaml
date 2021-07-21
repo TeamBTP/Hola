@@ -1,7 +1,7 @@
 _schema-version: "3.2"
 ID: tmsmanifest-tmsmanifest
 description: A Fiori application.
-version: 0.0.1
+version: 0.0.5
 modules:
 - name: tmsmanifest-tmsmanifest-dest-content
   type: com.sap.application.content

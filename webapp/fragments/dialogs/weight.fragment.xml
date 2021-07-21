@@ -21,17 +21,31 @@
                 <f:formContainers>
                     <f:FormContainer>
                         <f:formElements>
-                            <f:FormElement label="{i18n>weight}">
+                            <f:FormElement label="{i18n>quantity}">
                                 <f:fields>
-                                    <Input value="{Info>/weight}" type="Number" />
+                                    <Input value="{Info>/bultos}" maxLength="7" type="Number"/>
                                 </f:fields>
                             </f:FormElement>
-                            <f:FormElement label="{i18n>um}">
+                            <f:FormElement label="{i18n>typePackage}">
                                 <f:fields>
-                                    <ComboBox id="idCBUm" selectedKey="{Info>/um}" >
-                                        <core:Item key="KG" text="KG" />
-                                        <core:Item key="TON" text="TON" />
+                                    <ComboBox selectedKey="{Info>/typeBulto}" items="{typeBultosModel>/value/0/parameter/}">
+                                        <core:ListItem key="{typeBultosModel>name}" text="{typeBultosModel>name}"/>
                                     </ComboBox>
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>storageLocationTarget}">
+                                <f:fields>
+                                    <ComboBox selectedKey="{Info>/EX_LGORT}" showSecondaryValues= "true" items="{storageModel>/}">
+                                        <core:ListItem key="{storageModel>EX_LGORT}" enabled="{storageModel>enable}" text="{storageModel>EX_LGOBE}" additionalText="{storageModel>EX_LGORT}" />
+                                    </ComboBox>
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>weight}">
+                                <f:fields>
+                                    <HBox alignContent="Center" alignItems="Center" >
+                                        <Input value="{Info>/weight}" type="Number" maxLength="7"/>
+                                        <Text class="sapUiSmallMarginBegin" text="{i18n>unitWeight}"/>
+                                    </HBox>
                                 </f:fields>
                             </f:FormElement>
                         </f:formElements>

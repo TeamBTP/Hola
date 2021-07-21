@@ -3,6 +3,13 @@
   "authenticationMethod": "route",
   "routes": [
     {
+        "source": "^/tmsmanifest/(.*)$",
+        "target": "/tmsmanifest/$1",
+        "destination": "TMSMANIFEST_CAP_DB",
+        "authenticationType": "xsuaa",
+        "csrfProtection": false
+    },
+    {
       "source": "^/sap/(.*)$",
       "target": "/sap/$1",
       "destination": "AOPDS8160_CLONING",

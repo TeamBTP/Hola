@@ -1,0 +1,83 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form">
+    <Dialog id="idDialogFilters" title="{i18n>filtersTitle}" contentWidth="auto" resizable="true" draggable="true">
+        <Panel>
+           <f:Form>
+                <f:layout>
+                    <f:ResponsiveGridLayout
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="12"
+                        labelSpanS="12"
+                        adjustLabelSpan="false"
+                        emptySpanXL="3"
+                        emptySpanL="3"
+                        emptySpanM="0"
+                        emptySpanS="0"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2"
+                        singleContainerFullSize="false" />
+                </f:layout>
+                <f:formContainers>
+                    <f:FormContainer>
+                        <f:formElements>
+                            <!-- PLANTAS / CENTROS -->
+                            <f:FormElement label="{i18n>plant}">
+                                <f:fields>
+                                    <ComboBox editable="false" selectionChange="getStorageLocation" selectedKey="{filterModel>/EX_WERKS}" showSecondaryValues= "true" items="{plantModel>/}">
+                                        <core:ListItem key="{plantModel>EX_WERKS}" text="{plantModel>EX_NAME1}" additionalText="{plantModel>EX_WERKS}" />
+                                    </ComboBox>
+                                </f:fields>
+                            </f:FormElement>
+                            <!-- ALMACEN / STORAGE LOCATION -->
+                            <f:FormElement label="{i18n>storageLocation}">
+                                <f:fields>
+                                    <ComboBox editable="false" selectedKey="{filterModel>/EX_LGORT}" showSecondaryValues= "true" items="{storageModel>/}">
+                                        <core:ListItem key="{storageModel>EX_LGORT}" text="{storageModel>EX_LGOBE}" additionalText="{storageModel>EX_LGORT}" />
+                                    </ComboBox>
+                                </f:fields>
+                            </f:FormElement>
+                            <!-- PROVEEDOR / VENDOR -->
+                            <f:FormElement label="{i18n>vendor} ({i18n>optional})">
+                                <f:fields>
+                                    <ComboBox selectedKey="{filterModel>/EX_LIFNR}" showSecondaryValues= "true" items="{vendorModel>/}">
+                                        <core:ListItem key="{vendorModel>EX_LIFNR}" text="{vendorModel>EX_NAME1}" additionalText="{vendorModel>EX_LIFNR}" />
+                                    </ComboBox>
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>fromDate}">
+                                <f:fields>
+                                    <DatePicker
+                                        value="{filterModel>/IN_BUDAT_MKPF_FROM}" valueFormat="yyyyMMdd"
+                                        displayFormat="yyyy-MM-dd"
+                                        placeholder="{i18n>placeholderDate}"
+                                        class="sapUiSmallMarginBottom"/>
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>toDate}">
+                                <f:fields>
+                                    <DatePicker
+                                        value="{filterModel>/IN_BUDAT_MKPF_TO}" valueFormat="yyyyMMdd"
+                                        displayFormat="yyyy-MM-dd"
+                                        placeholder="{i18n>placeholderDate}"
+                                        class="sapUiSmallMarginBottom"/>
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>typeMaterials}">
+                                <f:fields>
+                                    <Input value="{path: 'Info>/typeMaterials', formatter: '.Formatter.formatTypeMaterials'}" type="Text" editable="false" />
+                                </f:fields>
+                            </f:FormElement>
+                        </f:formElements>
+                    </f:FormContainer>
+                </f:formContainers>
+            </f:Form>
+        </Panel>
+        <beginButton>
+            <Button text="{i18n>filter}"  type="Accept" press="filterGD"></Button>
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>cancel}"  type="Reject" press="closeDialog"></Button>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

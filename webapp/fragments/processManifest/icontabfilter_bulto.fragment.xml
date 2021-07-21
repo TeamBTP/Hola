@@ -1,6 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
     <!-- Nuevo Bulto y sus respectivos items -->
     <IconTabFilter
+        enabled="false"
         icon="sap-icon://product"
         key="pallet"
         count="{Info>/countItems}">
@@ -8,8 +9,8 @@
         <Page title="{i18n>titleBulto}" >
             <headerContent>
                 <!-- Botones de Crear Bulto y eliminar items de un Bulto -->
-                <Button icon="sap-icon://add-product" id="idButtonCreatePallet" press="createPallet" type="Accept" text="{i18n>createBulto}"/>
-                <Button icon="sap-icon://delete" id="idButtonDelete" press="delete" type="Reject" text="{i18n>enableDelete}"/>
+                <Button icon="sap-icon://add-product" id="idButtonCreatePallet" press="createPallet" visible="false" type="Accept" text="{i18n>createPackage}"/>
+                <Button icon="sap-icon://delete" id="idButtonDelete" press="delete" type="Reject" visible="false" text="{i18n>enableDelete}"/>
             </headerContent>
             <content>
                 <!-- Tabla de los items que contiene el Bulto a crear -->
@@ -27,6 +28,9 @@
                         </Column>
                         <Column >
                             <Text text="{i18n>item}" />
+                        </Column>
+                        <Column >
+                            <Text text="{i18n>cod_material}" />
                         </Column>
                         <Column >
                             <Text text="{i18n>descrip}" />
@@ -49,18 +53,19 @@
                     <items>
                         <ColumnListItem>
                             <cells>
-                                <Text text="{palletModel>deliveryOrders}"/>
-                                <Text text="{palletModel>proveedor}"/>
-                                <Text text="{palletModel>fecha}"/>
-                                <Text text="{palletModel>Item}"/>
-                                <Text text="{palletModel>Descripcion}"/>
+                                <Text text="{palletModel>deliveryOrder}"/>
+                                <Text text="{palletModel>provider}"/>
+                                <Text text="{path: 'palletModel>date', formatter: '.Formatter.formatDate'}"/>
+                                <Text text="{palletModel>code}"/>
+                                <Text text="{palletModel>materialCode}"/>
+                                <Text text="{palletModel>description}"/>
                                 <ObjectNumber
-                                    number="{path:'palletModel>Cantidad'}"
-                                    unit="{palletModel>UM}" />
+                                    number="{path:'palletModel>quantity'}"
+                                    unit="{palletModel>unitMeasure}" />
                                 <ObjectNumber
-                                    number="{path:'palletModel>Precio'}"
-                                    unit="{palletModel>Moneda}" />
-                                <Text text="{palletModel>Ceco}"></Text>
+                                    number="{path:'palletModel>price'}"
+                                    unit="{palletModel>currency}" />
+                                <Text text="{palletModel>ceco}"></Text>
                                 <!-- Boton para Eliminar item del Bulto -->
                                 <Button icon="sap-icon://less" press="deleteGD" type="Reject"></Button>
                             </cells>
@@ -71,7 +76,7 @@
             <!-- Informacion sobre el estado del camion -->
             <footer>
                 <OverflowToolbar >
-                    <Text class="sapUiSmallMargin" text="{i18n>infoTransport}"  />
+                    <Text class="sapUiSmallMargin" text="{i18n>infoTransport}: {Info>/transport/EX_NAME}" />
                     <ToolbarSpacer/>
                     <ObjectStatus
                         class="sapUiSmallMargin"

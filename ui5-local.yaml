@@ -26,6 +26,9 @@ server:
         url: http://gszajnb782.anglo.local:8000
         client: '160'
         destination: AOPDS8160_CLONING
+      - path: /tmsmanifest
+        url: https://3ec87632trial-dev-tmsmanifest-srv.cfapps.us10.hana.ondemand.com
+        destination: TMSMANIFEST_CAP_DB
   - name: fiori-tools-appreload
     afterMiddleware: compression
     configuration:

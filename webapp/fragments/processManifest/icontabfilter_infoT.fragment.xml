@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form">
     <!-- Información del Transportitas -->
-    <IconTabFilter icon="sap-icon://customer-order-entry" key="infoTModel" >
+    <IconTabFilter icon="sap-icon://customer-order-entry" key="infoTModel" enabled="false">
         <Page title="{i18n>titleInfoT}" >
             <Panel >
                 <headerToolbar>
@@ -38,26 +38,37 @@
                                     <f:formElements>
                                         <f:FormElement label="{i18n>carrier}">
                                             <f:fields>
-                                                <ComboBox selectedKey="{Info>/um}" >
-                                                    
+                                                <ComboBox selectedKey="{Info>/nameT}" items="{carrierModel>/value/0/parameter/}" showSecondaryValues= "true">
+                                                    <core:ListItem key="{carrierModel>name}" text="{carrierModel>name}" additionalText="{carrierModel>value}" />
                                                 </ComboBox>
                                             </f:fields>
                                         </f:FormElement>
                                         <f:FormElement label="{i18n>licenseplate}">
                                             <f:fields>
-                                                <ComboBox selectedKey="{Info>/um}" >
-                                                    
-                                                </ComboBox>
+                                                <Input type="Text" value="{Info>/plate}" maxLength="20"/>
                                             </f:fields>
                                         </f:FormElement>
                                         <f:FormElement label="{i18n>license}">
                                             <f:fields>
-                                                <Input />
+                                                <Input type="Text" value="{Info>/license}" maxLength="20"/>
                                             </f:fields>
                                         </f:FormElement>
-                                        <f:FormElement label="{i18n>route}">
+                                        <f:FormElement label="{i18n>brand}">
                                             <f:fields>
-                                                <Input />
+                                                <Input type="Text" value="{Info>/brand}" maxLength="20"/>
+                                            </f:fields>
+                                        </f:FormElement>
+                                        <f:FormElement label="{i18n>startdate}">
+                                             <DatePicker
+                                                value="{Info>/startDate}"
+                                                valueFormat="yyyyMMdd"
+                                                displayFormat="yyyy-MM-dd"
+                                                placeholder="{i18n>placeholderDate}"
+                                                class="sapUiSmallMarginBottom"/>
+                                        </f:FormElement>
+                                        <f:FormElement label="{i18n>obs}">
+                                            <f:fields>
+                                               <TextArea  showExceededText="true" value="{Info>/obs}" maxLength="80" width="100%" liveChange="handleLiveChange" valueState="None" valueLiveUpdate="true"/>
                                             </f:fields>
                                         </f:FormElement>
                                     </f:formElements>

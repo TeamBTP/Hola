@@ -10,9 +10,6 @@
 			<pages>
 				<Page id="pageHome" title="{i18n>title}" >
                     <content>
-                        
-
-
                         <IconTabBar  
                             applyContentPadding="true" stretchContentHeight="true"
                             id="idIconTabBarMulti"
@@ -21,6 +18,8 @@
                             selectedKey="gd"
                             select='unselectGD'>
                             <items>
+                                <core:Fragment fragmentName="tmsmanifest.tmsmanifest.fragments.processManifest.icontabfilter_typeGD" type="XML" id="idFragmentITFType"/>
+                                <IconTabSeparator icon="sap-icon://open-command-field" />
                                 <core:Fragment fragmentName="tmsmanifest.tmsmanifest.fragments.processManifest.icontabfilter_TT" type="XML" id="idFragmentITFTT"/>
                                 <IconTabSeparator icon="sap-icon://open-command-field" />
                                 <core:Fragment fragmentName="tmsmanifest.tmsmanifest.fragments.processManifest.icontabfilter_gd" type="XML" id="idFragmentITFGD"/>

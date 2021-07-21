@@ -4,12 +4,12 @@
         icon="sap-icon://shipping-status"
         key="orderModel"
         count="{Info>/countPallets}"
+        enabled="false"
         >
         <Page id="orderPage" title="{i18n>order}" >
             <headerContent> 
                    <!-- Peso total de la orden en base a todos los bultos agregados -->
-                <Text class="sapUiLargeMarginEnd" text="{i18n>totalWeight} = {Info>/totalWeight} {i18n>unitWeight}"/>
-                <Button icon="sap-icon://accept" press="cerrarOrder" type="Accept" text="{i18n>closeOrder}"/>
+                <Button icon="sap-icon://accept" id="idButtonClose" press="cerrarOrder" visible="false" type="Accept" text="{i18n>closeOrder}"/>
             </headerContent>
             <content>
                 <!-- Lista de Bultos agregados en la orden, cada bulto esta en un panel  -->
@@ -20,14 +20,16 @@
                             <Panel expandable="true" expanded="false">
                                 <headerToolbar>
                                     <OverflowToolbar>
-                                        <Title text="{i18n>titlePanels} {orderModel>codBulto}"/>
+                                        <Title text="{i18n>titlePanels} {orderModel>code}"/>
                                         <ToolbarSpacer />
-                                        <Text text="{i18n>weight}: {orderModel>weight} {orderModel>um} -" />
-                                        <Text text="{i18n>countItems}: {orderModel>countItems}" />                      
+                                        <Text text="{i18n>quantity}: {orderModel>quantity} - {i18n>typePackage}: {orderModel>type} - {i18n>storageLocationTarget}: {orderModel>target}" />
+                                        <ToolbarSpacer />
+                                        <Text text="{i18n>weight}: {orderModel>weight} {i18n>unitWeight} -" />
+                                        <Text text="{i18n>countItems}: {orderModel>quantityItem}" />                      
                                     </OverflowToolbar>
                                 </headerToolbar>
                                 <!-- Tabla - Detalle de un Bulto -->
-                                <Table items="{orderModel>detail/}" fixedLayout="false" alternateRowColors="true">
+                                <Table items="{orderModel>item/}" fixedLayout="false" alternateRowColors="true">
                                     <columns>
                                         <Column >
                                             <Text text="{i18n>deliveryOrders}" />
@@ -60,19 +62,19 @@
                                     <items>
                                         <ColumnListItem >
                                             <cells>
-                                                <Text text="{orderModel>deliveryOrders}"/>
-                                                <Text text="{orderModel>proveedor}"/>
-                                                <Text text="{orderModel>fecha}"/>
-                                                <Text text="{orderModel>Item}"/>
-                                                <Text text="{orderModel>Codigo_materia}"/>
-                                                <Text text="{orderModel>Descripcion}"/>
+                                                <Text text="{orderModel>deliveryOrder}"/>
+                                                <Text text="{orderModel>provider}"/>
+                                                <Text text="{path: 'orderModel>date', formatter: '.Formatter.formatDate'}"/>
+                                                <Text text="{orderModel>code}"/>
+                                                <Text text="{orderModel>materialCode}"/>
+                                                <Text text="{orderModel>description}"/>
                                                 <ObjectNumber
-                                                    number="{path:'orderModel>Cantidad'}"
-                                                    unit="{orderModel>UM}" />
+                                                    number="{path:'orderModel>quantity'}"
+                                                    unit="{orderModel>unitMeasure}" />
                                                 <ObjectNumber
-                                                    number="{path:'orderModel>Precio'}"
-                                                    unit="{orderModel>Moneda}" />
-                                                <Text text="{orderModel>Ceco}"></Text>
+                                                    number="{path:'orderModel>price'}"
+                                                    unit="{orderModel>currency}" />
+                                                <Text text="{orderModel>ceco}"></Text>
                                             </cells>
                                         </ColumnListItem>
                                     </items>
@@ -82,6 +84,25 @@
                     </items>
                 </List>
             </content>
+            <footer>
+                <OverflowToolbar >
+                    <Text class="sapUiSmallMargin" text="{i18n>infoTransport}: {Info>/transport/EX_NAME}"  />
+                    <ToolbarSpacer/>
+                    <ObjectStatus
+                        class="sapUiSmallMargin"
+                        text="{i18n>actualWeight}: {Info>/totalWeight} {i18n>unitWeight}"
+                        state="Indication04" />
+                        <ToolbarSeparator>
+                            <layoutData>
+                                <OverflowToolbarLayoutData group="2"/>
+                            </layoutData>
+                        </ToolbarSeparator>
+                    <ObjectStatus
+                        class="sapUiSmallMargin"
+                        text="{i18n>maxWeight}: {Info>/transport/EX_NOINDIVRES} {Info>/transport/EX_NOINDIVRES_UNIT}"
+                        state="Information" />
+                </OverflowToolbar>
+            </footer>
         </Page>
     </IconTabFilter>
 </core:FragmentDefinition>

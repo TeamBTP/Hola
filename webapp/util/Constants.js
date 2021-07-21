@@ -11,7 +11,15 @@ sap.ui.define([
                 infoModel: "Info",
                 orderModel: "orderModel",
                 gdModel: "GD",
-                infoTModel: "infoTModel"
+                infoTModel: "infoTModel",
+                plantModel: "plantModel",
+                filterModel: "filterModel",
+                storageModel: "storageModel",
+                vendorModel: "vendorModel",
+                centroModel: "centroModel",
+                carrierModel: "carrierModel",
+                typeBultosModel: "typeBultosModel",
+                headerModel: "headerModel"
             },
             json: {
                 gdd: "GDD.json",
@@ -22,28 +30,53 @@ sap.ui.define([
                     id: "idDialogWeight",
                     name: "weight",
                     route: "tmsmanifest.tmsmanifest.fragments.dialogs.weight"
+                },
+                dialog2: {
+                    id: "idDialogFilters",
+                    name: "filters",
+                    route: "tmsmanifest.tmsmanifest.fragments.dialogs.filter"
+                },
+                dialog3: {
+                    id: "idDialogFilterHome",
+                    name: "filterHome",
+                    route: "tmsmanifest.tmsmanifest.fragments.dialogs.filterHome"
                 }
             },
             filters: {
-                filter1:"Proveedor",
-                filter2:"Numero_guia",
-                filter3:"Fecha"
+                filter1:"provider",
+                filter2:"deliveryOrder",
+                filter3:"date"
             },
             properties: {
                 guideModel: {
-                    property1: "/Numero_guia",
-                    property2: "/Proveedor",
-                    property3: "/Fecha"
+                    property1: "/deliveryOrder",
+                    property2: "/provider",
+                    property3: "/date"
                 },
                 infoModel: {
                     property1: "/countItems",
                     property2 : "/countPallets",
                     property3: "/totalWeight",
-                    property4: "/um",
+                    property4: "",
                     property5: "/weight",
                     property6: "/transport",
                     property7: "/transport/EX_NOINDIVRES",
-                    property8: "/pathTransport"
+                    property8: "/pathTransport",
+                    property9: "/typeMaterials",
+                    property10: "/typeBulto",
+                    property11: "/bultos",
+                    property12: "/EX_LGORT"
+                },
+                transportModel: {
+                    property1: "/Status"
+                },
+                filterModel: {
+                    property1: "/EX_LGORT",
+                    property2: "/EX_LIFNR",
+                    property3: "/EX_WERKS"
+                },
+                centroModel: {
+                    property1: "/value/0/parameter/0/value"
                 },
                 palletModel: {
                     property1: "/items"
@@ -67,11 +100,19 @@ sap.ui.define([
                 },
                 icontabfilter_bulto:{
                     id: "idFragmentITFBulto",
-                    columnAction: "idColumnAction"
+                    columnAction: "idColumnAction",
+                    buttonCreate: "idButtonCreatePallet",
+                    buttonDelete: "idButtonDelete",
+                    tableItems: "idTableItems"
                 },
                 icontabfilter_TT:{
                     id: "idFragmentITFTT",
-                    tableTransport: "idTableTransport"
+                    tableTransport: "idTableTransport",
+                    buttonAccept: "idButtonAccept"
+                },
+                icontabfilter_order:{
+                    id: "idFragmentITFOrder",
+                    buttonClose: "idButtonClose"
                 }
             },
             routes: {
@@ -81,4 +122,6 @@ sap.ui.define([
                 }
             }
 		};
-	}, true);
+    }, true);
+    
+

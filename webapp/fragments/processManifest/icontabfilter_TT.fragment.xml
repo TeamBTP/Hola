@@ -1,14 +1,17 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout"  >
     <!--Tipo de Transporte -->
-    <IconTabFilter icon="sap-icon://hint" key="transportModel" >
+    <IconTabFilter icon="sap-icon://hint" key="transportModel" enabled="false">
         <Page title="{i18n>titleTransport}" >
             <headerContent>
                 <!-- Boton que guardara la opcion seleccionada y que avanzara al siguiente proceso -->
-                <Button icon="sap-icon://accept" type="Accept" text="{i18n>accept}" press="confirmTransport"/>
+                <Button icon="sap-icon://accept" id="idButtonAccept" type="Accept" text="{i18n>accept}" visible="false" press="confirmTransport"/>
             </headerContent>
             <content>
               
-                <Table xmlns="sap.ui.table" rows="{path: 'transportModel>/'}" enableColumnReordering="false" id="idTableTransport" visibleRowCount="13" selectionMode="None" rowSelectionChange="onLineItemSelected"  showNoData="true">
+                <Table xmlns="sap.ui.table" rows="{path: 'transportModel>/'}" rowsUpdated="changeCount"  enableColumnReordering="false" id="idTableTransport" selectionMode="None"  showNoData="true">
+                    <rowSettingsTemplate>
+					    <RowSettings highlight="{transportModel>Status}"/>
+				    </rowSettingsTemplate>
                     <columns>
                         <Column width="120px" hAlign="Center">
                             <!-- <CheckBox id="oCheckBoxAll" xmlns="sap.m" select="selectAllCheckBox"/> -->
@@ -16,7 +19,7 @@
                                 <CheckBox xmlns="sap.m" selected="false" select="checked"/>
                             </template>
                         </Column>
-                        <Column width="auto"  hAlign="Center" sortProperty="EX_RESUID" filterProperty="EX_RESUID">
+                        <Column width="auto"  hAlign="Center" sortProperty="EX_RESUID" visible="false" >
                             <Label xmlns="sap.m" text="{i18n>resuid}"/>
                             <template>
                                 <Text xmlns="sap.m" text="{transportModel>EX_RESUID}"/>
@@ -28,13 +31,13 @@
                                 <Text xmlns="sap.m" text="{transportModel>EX_NAME}"/>
                             </template>
                         </Column>
-                        <Column width="auto"  hAlign="Center" sortProperty="EX_NOINDIVRES" filterProperty="EX_NOINDIVRES">
+                        <Column width="auto"  hAlign="Center" sortProperty="EX_NOINDIVRES" >
                             <Label xmlns="sap.m" text="{i18n>dimension_mass}"/>
                             <template>
                                 <Text xmlns="sap.m" text="{transportModel>EX_NOINDIVRES} {transportModel>EX_NOINDIVRES_UNIT}"/>
                             </template>
                         </Column>
-                        <Column width="auto"  hAlign="Center" sortProperty="EX_NOINDIVRES2" filterProperty="EX_NOINDIVRES2">
+                        <Column width="auto"  hAlign="Center" sortProperty="EX_NOINDIVRES2" >
                             <Label xmlns="sap.m" text="{i18n>dimension_volume}"/>
                             <template>
                                 <Text xmlns="sap.m" text="{transportModel>EX_NOINDIVRES2} {transportModel>EX_NOINDIVRES_UNIT2}"/>

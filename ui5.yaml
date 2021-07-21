@@ -14,6 +14,9 @@ server:
         url: http://gszajnb782.anglo.local:8000
         client: '160'
         destination: AOPDS8160_CLONING
+      - path: /tmsmanifest
+        url: https://aopl-cfanglodev-tms-manifest-tmsmanifest-srv.cfapps.eu10.hana.ondemand.com
+        destination: TMSMANIFEST_CAP_DB
       ui5:
         path: 
         - /resources

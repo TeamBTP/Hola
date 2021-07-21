@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
     <!-- Guias de despacho y su respectivo detalle -->
-    <IconTabFilter icon="sap-icon://supplier" key="GD" >
+    <IconTabFilter icon="sap-icon://supplier" key="GD" enabled="false">
         <content>
             <SplitContainer
                 id="SplitAppDemo"
@@ -9,12 +9,12 @@
                 initialMaster="master">
                 <!-- Seccion del Detalle de una guia seleccionada -->
                 <detailPages>
-                    <Page id="pageDetail" title="{i18n>titleDetailGuide} {guideModel>/Numero_guia}" >
+                    <Page id="pageDetail" title="{i18n>titleDetailGuide} {guideModel>/deliveryOrder}  -   GR: {guideModel>/gr}" >
                         <headerContent>
                             <!-- Boton para añadir los items seleccionados al bulto -->
                             <Button icon="sap-icon://add" type="Accept" text="{i18n>additems}" press="add"/>
                         </headerContent>
-                        <Table id="idTableDetailGuide" updateFinished="validateSelected" mode="MultiSelect" items="{guideModel>/detail/}" noDataText="{i18n>noDetailGuide}" fixedLayout="false" alternateRowColors="true">
+                        <Table id="idTableDetailGuide" updateFinished="validateSelected" mode="MultiSelect" items="{guideModel>/detail/}" noDataText="{i18n>noDetailGuide}" alternateRowColors="true">
                             <!-- Cabezeras de la tabla -->
                             <columns>
                                 <Column >
@@ -40,16 +40,16 @@
                             <items>
                                 <ColumnListItem id="cell" selected="{guideModel>selected}">
                                     <cells>
-                                        <Text text="{guideModel>Item}"/>
-                                        <Text text="{guideModel>Codigo_materia}"/>
-                                        <Text text="{guideModel>Descripcion}"/>
+                                        <Text text="{guideModel>code}"/>
+                                        <Text text="{guideModel>materialCode}"/>
+                                        <Text text="{guideModel>description}"/>
                                         <ObjectNumber
-                                            number="{path:'guideModel>Cantidad'}"
-                                            unit="{guideModel>UM}" />
+                                            number="{path:'guideModel>quantity'}"
+                                            unit="{guideModel>unitMeasure}" />
                                         <ObjectNumber
-                                            number="{path:'guideModel>Precio'}"
-                                            unit="{guideModel>Moneda}" />
-                                        <Text text="{guideModel>Ceco}"></Text>
+                                            number="{path:'guideModel>price'}"
+                                            unit="{guideModel>currency}" />
+                                        <Text text="{guideModel>ceco}"></Text>
                                     </cells>
                                 </ColumnListItem>
                             </items>
@@ -58,19 +58,19 @@
                 </detailPages>
                 <!-- Seccion de Lista de guias -->
                 <masterPages>
-                    <Page id="page" title="{i18n>titleGD}">
+                    <Page id="page" title="{i18n>titleGD} {path: 'Info>/typeMaterials', formatter: '.Formatter.formatTypeMaterials'}">
                         <subHeader>
                             <!-- Buscador y filtro de guias -->
                             <OverflowToolbar>
                                 <SearchField width="80%" placeholder="{i18n>search}" liveChange="onSearch"/>
-                                <Button icon="sap-icon://filter" press="onFilter"></Button>                     
+                                <Button icon="sap-icon://filter" press="createFilterDialog"></Button>                     
                             </OverflowToolbar>
                         </subHeader>
                         <content>
                             <!-- Lista de guias de despacho -->
-                            <List id="idListGD" class="sapUiLargeMarginBottom" items="{path:'GD>/', sorter: {path:'Proveedor'}}" mode="SingleSelect" selectionChange="selectGD">
+                            <List id="idListGD" class="sapUiLargeMarginBottom" items="{path:'GD>/', sorter: {path:'provider'}}" mode="SingleSelect" selectionChange="selectGD">
                                 <items>
-                                    <StandardListItem title="{GD>Proveedor}" description="{GD>Numero_guia}" info="{GD>Fecha}"></StandardListItem>
+                                    <StandardListItem title="{GD>provider}" description="{GD>deliveryOrder}" info="{path: 'GD>date', formatter: '.Formatter.formatDate'}"></StandardListItem>
                                 </items>
                             </List>
                         </content>
