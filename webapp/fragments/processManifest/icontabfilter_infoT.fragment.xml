@@ -38,8 +38,8 @@
                                     <f:formElements>
                                         <f:FormElement label="{i18n>carrier}">
                                             <f:fields>
-                                                <ComboBox selectedKey="{Info>/nameT}" items="{carrierModel>/value/0/parameter/}" showSecondaryValues= "true">
-                                                    <core:ListItem key="{carrierModel>name}" text="{carrierModel>name}" additionalText="{carrierModel>value}" />
+                                                <ComboBox selectedKey="{Info>/nameT}" items="{carrierModel>/}" showSecondaryValues= "true">
+                                                    <core:ListItem key="{carrierModel>EX_NAME_ORG1}" text="{carrierModel>EX_NAME_ORG1}" additionalText="{carrierModel>EX_PARTNER}" />
                                                 </ComboBox>
                                             </f:fields>
                                         </f:FormElement>

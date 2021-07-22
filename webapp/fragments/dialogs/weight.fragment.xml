@@ -28,8 +28,8 @@
                             </f:FormElement>
                             <f:FormElement label="{i18n>typePackage}">
                                 <f:fields>
-                                    <ComboBox selectedKey="{Info>/typeBulto}" items="{typeBultosModel>/value/0/parameter/}">
-                                        <core:ListItem key="{typeBultosModel>name}" text="{typeBultosModel>name}"/>
+                                    <ComboBox selectedKey="{Info>/typeBulto}" items="{typeBultosModel>/}">
+                                        <core:ListItem key="{typeBultosModel>EX_VTEXT}" text="{typeBultosModel>EX_TRAGR} - {typeBultosModel>EX_VTEXT} "/>
                                     </ComboBox>
                                 </f:fields>
                             </f:FormElement>

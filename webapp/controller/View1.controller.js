@@ -70,7 +70,7 @@ sap.ui.define([
                     totalWeight: 0,
                     bultos: 0,
                     typeBulto: "",
-                    nameT: "TRANSPORTISTA 01",
+                    nameT: "Transport TM",
                     plate: "",
                     license: "",
                     startDate: "",
@@ -93,7 +93,7 @@ sap.ui.define([
             },
 
             //--------------------------------->FUNCIONES COMUNES<----------------------------------
-            
+
             //Funcion para obtener el texto en el idioma que se requiere
             _get_i18n: function (key) {
                 var oController = this;
@@ -140,9 +140,9 @@ sap.ui.define([
                     day = '' + d.getDate(),
                     year = d.getFullYear();
 
-                if (month.length < 2) 
+                if (month.length < 2)
                     month = '0' + month;
-                if (day.length < 2) 
+                if (day.length < 2)
                     day = '0' + day;
 
                 return [year, month, day].join('');
@@ -160,118 +160,147 @@ sap.ui.define([
                     });
                     oModel.attachRequestCompleted(function () {
                         let data = oModel.getData();
-                        let res = {EX_RESPONSE: "S",EX_DATA: data};
+                        let res = { EX_RESPONSE: "S", EX_DATA: data };
                         resolve(res)
                     });
                     oModel.attachRequestFailed(function () {
                         let xhr = oModel.getData();
-                        let res = {EX_RESPONSE: "E",EX_DATA: xhr};
+                        let res = { EX_RESPONSE: "E", EX_DATA: xhr };
                         resolve(res);
                     });
                 })
             },
             getCentroCosto: async function (centro) {
-                var URL = "tmsmanifest/parameters/Category?$filter=(name%20eq%20%27CENTRO_COSTO-"+ centro +"%27)&$expand=parameter($filter=active%20eq%20true)";
+                var URL = "tmsmanifest/parameters/Category?$filter=(name%20eq%20%27CENTRO_COSTO-" + centro + "%27)&$expand=parameter($filter=active%20eq%20true)";
                 var oData = {
-                    
+
                 };
                 this.oLoaderData.open();
                 let response = await this.requestCAP(URL, oData, 'GET');
                 this.oLoaderData.close();
                 if (response.EX_RESPONSE == "S") {
-                    if (Object.entries(response.EX_DATA).length === 0){
-                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " CENTRO_COSTO-"+ centro).open();    
+                    if (Object.entries(response.EX_DATA).length === 0) {
+                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " CENTRO_COSTO-" + centro).open();
                     } else {
                         let oModel = new JSONModel(response.EX_DATA);
                         this.getOwnerComponent().setModel(oModel, Constants.model.centroModel);
-                    }                    
+                    }
                 } else {
                     this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
                 }
-                
+
             },
             getCarrier: async function () {
-                var URL = "tmsmanifest/parameters/Category?$filter=(name%20eq%20%27TRANSPORTISTA%27)&$expand=parameter($orderby=name%20asc)";
-                var oData = {
-                    
-                };
-                this.oLoaderData.open();
-                let response = await this.requestCAP(URL, oData, 'GET');
-                this.oLoaderData.close();
-                if (response.EX_RESPONSE == "S") {
-                    if (Object.entries(response.EX_DATA).length === 0){
-                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " TRANSPORTISTA").open();    
-                    } else {
-                        let oModel = new JSONModel(response.EX_DATA);
+                var oController = this;
+                var model = oController.getOwnerComponent().getModel("MODEL_ZTM_CARGO_MANIFEST_SRV");
+                var service = "/ZTM_CM_CARRIERSet";
+                var filters = []
+                var oData = {};
+                oController.oLoaderData.open();
+                try {
+                    let data = await oController.RequestSAPGETPromise(model, filters, service, oData);
+                    if (data[0].EX_RESULTADO_EJECUCION == "S") {
+                        // Response Ok
+                        let oDataModel = [];
+                        let json = {};
+                        data.forEach(item => {
+                            json.EX_PARTNER = item["EX_PARTNER"];
+                            json.EX_NAME_ORG1 = item["EX_NAME_ORG1"];
+                            oDataModel.push(json);
+                            json = {}
+                        });
+                        let oModel = new JSONModel(oDataModel);
                         this.getOwnerComponent().setModel(oModel, Constants.model.carrierModel);
-                    }                    
-                } else {
-                    this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
-                }
-                
-            },
-            getTypeBulto: async function () {
-                var URL = "tmsmanifest/parameters/Category?$filter=(name%20eq%20%27TIPOS_PAQUETES%27)&$expand=parameter($orderby=name%20asc)";
-                var oData = {
-                    
-                };
-                this.oLoaderData.open();
-                let response = await this.requestCAP(URL, oData, 'GET');
-                this.oLoaderData.close();
-                if (response.EX_RESPONSE == "S") {
-                    if (Object.entries(response.EX_DATA).length === 0){
-                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " TIPOS_PAQUETES").open();    
+                    } else if (data[0].EX_RESULTADO_EJECUCION == "E") {
+                        oController._buildDialog(oController._get_i18n("dialog_error"), "Error", data[0].EX_DSC_EJECUCION).open();
                     } else {
-                        let oModel = new JSONModel(response.EX_DATA);
-                        this.getOwnerComponent().setModel(oModel, Constants.model.typeBultosModel);
-                    }                    
-                } else {
-                    this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
+                        oController._buildDialog(oController._get_i18n("dialog_error"), "Error", oController._get_i18n("dialog_msg_1") + service).open();
+                    }
+                    oController.oLoaderData.close();
+                } catch (e) {
+                    oController.oLoaderData.close();
+                    //Response Error
+                    console.log(e)
+                    oController._buildDialog(oController._get_i18n("dialog_error"), "Error", oController._get_i18n("dialog_msg_1") + service).open();
                 }
-                
+            },
+            //Funcion encargada de obtener la data (tipo de transportes) desde el servicio de ERP la cual es guardada en un modelo 
+            getTypeBulto: async function () {
+                var oController = this;
+                var model = oController.getOwnerComponent().getModel("MODEL_ZTM_CARGO_MANIFEST_SRV");
+                var service = "/ZTM_CM_PACK_TYPESet";
+                var filters = []
+                var oData = {};
+                oController.oLoaderData.open();
+                try {
+                    let data = await oController.RequestSAPGETPromise(model, filters, service, oData);
+                    if (data[0].EX_RESULTADO_EJECUCION == "S") {
+                        // Response Ok
+                        let oDataModel = [];
+                        let json = {};
+                        data.forEach(item => {
+                            json.EX_TRAGR = item["EX_TRAGR"];
+                            json.EX_VTEXT = item["EX_VTEXT"];
+                            oDataModel.push(json);
+                            json = {}
+                        });
+                        let oModel = new JSONModel(oDataModel);
+                        this.getOwnerComponent().setModel(oModel, Constants.model.typeBultosModel);
+                    } else if (data[0].EX_RESULTADO_EJECUCION == "E") {
+                        oController._buildDialog(oController._get_i18n("dialog_error"), "Error", data[0].EX_DSC_EJECUCION).open();
+                    } else {
+                        oController._buildDialog(oController._get_i18n("dialog_error"), "Error", oController._get_i18n("dialog_msg_1") + service).open();
+                    }
+                    oController.oLoaderData.close();
+                } catch (e) {
+                    oController.oLoaderData.close();
+                    //Response Error
+                    console.log(e)
+                    oController._buildDialog(oController._get_i18n("dialog_error"), "Error", oController._get_i18n("dialog_msg_1") + service).open();
+                }
             },
             getHeaderData: async function () {
                 var URL = "tmsmanifest/parameters/Category?$filter=(name%20eq%20%27HEADER_FREIGTH_ORDER%27)&$expand=parameter($filter=active%20eq%20true)";
                 var oData = {
-                    
+
                 };
                 this.oLoaderData.open();
                 let response = await this.requestCAP(URL, oData, 'GET');
                 this.oLoaderData.close();
                 if (response.EX_RESPONSE == "S") {
-                    if (Object.entries(response.EX_DATA).length === 0){
-                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " HEADER DE LA FREIGTH ORDER").open();    
+                    if (Object.entries(response.EX_DATA).length === 0) {
+                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " HEADER DE LA FREIGTH ORDER").open();
                     } else {
                         return response.EX_DATA;
                         // let oModel = new JSONModel(response.EX_DATA);
                         // this.getOwnerComponent().setModel(oModel, Constants.model.headerModel);
-                    }                    
+                    }
                 } else {
                     this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
                 }
-                
+
             },
             getDeliveryOrder: async function (code) {
-                var URL = "tmsmanifest/cargo/DeliveryOrder?$filter=(code%20eq%20%27"+ code +"%27)&$expand=item";
+                var URL = "tmsmanifest/cargo/DeliveryOrder?$filter=(code%20eq%20%27" + code + "%27)&$expand=item";
                 var oData = {
-                    
+
                 };
                 this.oLoaderData.open();
                 let response = await this.requestCAP(URL, oData, 'GET');
                 this.oLoaderData.close();
                 if (response.EX_RESPONSE == "S") {
-                    if (Object.entries(response.EX_DATA).length === 0){
-                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " Delivery Order").open();    
+                    if (Object.entries(response.EX_DATA).length === 0) {
+                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " Delivery Order").open();
                     } else {
                         return response.EX_DATA;
                         // let oModel = new JSONModel(response.EX_DATA);
                         // this.getOwnerComponent().setModel(oModel, Constants.model.centroModel);
-                    }                    
+                    }
                 } else {
                     this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
                 }
             },
-            
+
             postCreateFreightOrder: async function (data) {
                 var URL = "tmsmanifest/cargo/CreateFreightOrder";
                 this.oLoaderData.open();
@@ -289,24 +318,24 @@ sap.ui.define([
                 // } else {
                 //     this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
                 // }
-                
+
             },
             getMaterial: async function (deliveryOrder, materialCode) {
-                var URL = "tmsmanifest/cargo/Material?$filter=(deliveryOrder eq '" + deliveryOrder + "' and materialCode eq '"+ materialCode + "')";
+                var URL = "tmsmanifest/cargo/Material?$filter=(deliveryOrder eq '" + deliveryOrder + "' and materialCode eq '" + materialCode + "')";
                 var oData = {
-                    
+
                 };
                 this.oLoaderData.open();
                 let response = await this.requestCAP(URL, oData, 'GET');
                 this.oLoaderData.close();
                 if (response.EX_RESPONSE == "S") {
-                    if (Object.entries(response.EX_DATA).length === 0){
-                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " Delivery Order").open();    
+                    if (Object.entries(response.EX_DATA).length === 0) {
+                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " Delivery Order").open();
                     } else {
                         return response.EX_DATA;
                         // let oModel = new JSONModel(response.EX_DATA);
                         // this.getOwnerComponent().setModel(oModel, Constants.model.centroModel);
-                    }                    
+                    }
                 } else {
                     this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
                 }
@@ -318,7 +347,7 @@ sap.ui.define([
                 this.oLoaderData.close();
             },
             deleteMaterial: async function (ID) {
-                var URL = "tmsmanifest/cargo/Material("+ ID +")";
+                var URL = "tmsmanifest/cargo/Material(" + ID + ")";
                 var oData = {
                 };
                 this.oLoaderData.open();
@@ -336,7 +365,7 @@ sap.ui.define([
                 try {
                     let data = await oController.RequestSAPGETPromise(model, filters, service, oData);
                     console.log(data);
-                    
+
                     if (data[0].EX_RESULTADO_EJECUCION == "S") {
                         //Response Ok
                         let oDataModel = [];
@@ -384,12 +413,12 @@ sap.ui.define([
                 var model = oController.getOwnerComponent().getModel("MODEL_ZTM_CARGO_MANIFEST_SRV");
                 var service = "/ZTM_CM_MATERIAL_DOCSet";
                 var filters = [
-                    new sap.ui.model.Filter("IN_WERKS",sap.ui.model.FilterOperator.EQ, IN_WERKS),
-                    new sap.ui.model.Filter("IN_LIFNR",sap.ui.model.FilterOperator.EQ, IN_LIFNR),
-                    new sap.ui.model.Filter("IN_LGORT",sap.ui.model.FilterOperator.EQ, IN_LGORT),
-                    new sap.ui.model.Filter("IN_BUDAT_MKPF_FROM",sap.ui.model.FilterOperator.EQ, IN_BUDAT_MKPF_FROM),
-                    new sap.ui.model.Filter("IN_BUDAT_MKPF_TO",sap.ui.model.FilterOperator.EQ, IN_BUDAT_MKPF_TO),
-                    new sap.ui.model.Filter("IN_SOBKZ",sap.ui.model.FilterOperator.EQ, IN_SOBKZ) //free "" y consig "X"
+                    new sap.ui.model.Filter("IN_WERKS", sap.ui.model.FilterOperator.EQ, IN_WERKS),
+                    new sap.ui.model.Filter("IN_LIFNR", sap.ui.model.FilterOperator.EQ, IN_LIFNR),
+                    new sap.ui.model.Filter("IN_LGORT", sap.ui.model.FilterOperator.EQ, IN_LGORT),
+                    new sap.ui.model.Filter("IN_BUDAT_MKPF_FROM", sap.ui.model.FilterOperator.EQ, IN_BUDAT_MKPF_FROM),
+                    new sap.ui.model.Filter("IN_BUDAT_MKPF_TO", sap.ui.model.FilterOperator.EQ, IN_BUDAT_MKPF_TO),
+                    new sap.ui.model.Filter("IN_SOBKZ", sap.ui.model.FilterOperator.EQ, IN_SOBKZ) //free "" y consig "X"
                 ]
                 var oData = {};
                 oController.oLoaderData.open();
@@ -398,7 +427,7 @@ sap.ui.define([
                     if (data[0].EX_RESULTADO_EJECUCION == "S") {
                         //Response Ok        
                         console.log(data);
-                                        
+
                         let oDataModel = [];
                         let json = {};
                         let EX_MBLN_ANT = "";
@@ -426,9 +455,9 @@ sap.ui.define([
                                 item.description = element["EX_MAKTX"].trim();
                             }
                             detail.push(item);
-                            let elementNext = data[index+1];
+                            let elementNext = data[index + 1];
                             if (elementNext != undefined) {
-                                while (EX_MBLN == elementNext["EX_MBLN"]){
+                                while (EX_MBLN == elementNext["EX_MBLN"]) {
                                     item = {};
                                     item.code = elementNext["EX_ZEILE"].trim();
                                     item.quantity = parseInt(elementNext["EX_ERFMG"].trim());
@@ -445,9 +474,9 @@ sap.ui.define([
                                         item.description = elementNext["EX_MAKTX"].trim();
                                     }
                                     detail.push(item);
-                                    index ++;
-                                    if (index + 1 < data.length-1) {
-                                        elementNext = data[index+1];
+                                    index++;
+                                    if (index + 1 < data.length - 1) {
+                                        elementNext = data[index + 1];
                                     } else {
                                         // item = {};
                                         // item.code = elementNext["EX_ZEILE"].trim();
@@ -471,7 +500,7 @@ sap.ui.define([
                             oDataModel.push(json);
                             json = {};
                         }
-                        oDataModel.forEach(async function (GD){
+                        oDataModel.forEach(async function (GD) {
                             // let response = await oController.getDeliveryOrder(GD.deliveryOrder);
                             // if (response.value.length > 0) {
                             //     GD.detail.forEach(item => {
@@ -483,13 +512,13 @@ sap.ui.define([
                             // }
                             GD.detail.forEach(async item => {
                                 let response = await oController.getMaterial(GD.deliveryOrder, item.materialCode);
-                                if (response.value.length > 0){
+                                if (response.value.length > 0) {
                                     item.selected = true;
                                     item.editable = false;
                                 }
                             });
                         });
-                        
+
                         let oModel = new JSONModel(oDataModel);
                         oController.getOwnerComponent().setModel(oModel, Constants.model.gdModel);
                     } else if (data[0].EX_RESULTADO_EJECUCION == "E") {
@@ -512,7 +541,7 @@ sap.ui.define([
                 var model = oController.getOwnerComponent().getModel("MODEL_ZTM_CARGO_MANIFEST_SRV");
                 var service = "/ZTM_CM_WERKSSet";
                 var filters = [
-                    new sap.ui.model.Filter("IN_BUKRS",sap.ui.model.FilterOperator.EQ, "CP01"),
+                    new sap.ui.model.Filter("IN_BUKRS", sap.ui.model.FilterOperator.EQ, "CP01"),
                 ]
                 var oData = {};
                 oController.oLoaderData.open();
@@ -541,7 +570,7 @@ sap.ui.define([
                 var model = oController.getOwnerComponent().getModel("MODEL_ZTM_CARGO_MANIFEST_SRV");
                 var service = "/ZTM_CM_STO_LOCATIONSet";
                 var filters = [
-                    new sap.ui.model.Filter("IN_WERKS",sap.ui.model.FilterOperator.EQ, IN_WERKS),
+                    new sap.ui.model.Filter("IN_WERKS", sap.ui.model.FilterOperator.EQ, IN_WERKS),
                 ]
                 var oData = {};
                 oController.oLoaderData.open();
@@ -570,7 +599,7 @@ sap.ui.define([
                 var model = oController.getOwnerComponent().getModel("MODEL_ZTM_CARGO_MANIFEST_SRV");
                 var service = "/ZTM_CM_SUPPLIERSSet";
                 var filters = [
-                    new sap.ui.model.Filter("IN_BUKRS",sap.ui.model.FilterOperator.EQ, "CP01"),
+                    new sap.ui.model.Filter("IN_BUKRS", sap.ui.model.FilterOperator.EQ, "CP01"),
                 ]
                 var oData = {};
                 oController.oLoaderData.open();
@@ -673,139 +702,139 @@ sap.ui.define([
                     let firstDayMonth = new Date(toDay.getFullYear(), toDay.getMonth(), 1);
                     let lastDayMonth = new Date(toDay.getFullYear(), toDay.getMonth() + 1, 0);
                     firstDayMonth = this.formatDate(firstDayMonth);
-                    lastDayMonth = this.formatDate(lastDayMonth);     
+                    lastDayMonth = this.formatDate(lastDayMonth);
                     let header = oEvent.getSource().getProperty("header");
                     let oFilters = {};
                     if (header == this._get_i18n("consignmentMaterials")) {
                         this.getView().getModel(Constants.model.infoModel).setProperty(Constants.properties.infoModel.property9, "X");
                         // this.getMaterialsSRV("C601", "20190101", lastDayMonth, "", "", "X");
-                        oFilters= {
+                        oFilters = {
                             EX_WERKS: "C601",
                             IN_BUDAT_MKPF_FROM: "20190101",
                             IN_BUDAT_MKPF_TO: lastDayMonth,
                             EX_LGORT: "",
-                            EX_LIFNR: ""                    
+                            EX_LIFNR: ""
                         }
                         let oModel = new JSONModel();
                         this.getOwnerComponent().setModel(oModel, Constants.model.centroModel);
-                        
+
                     } else {
                         this.getView().getModel(Constants.model.infoModel).setProperty(Constants.properties.infoModel.property9, "");
                         // this.getMaterialsSRV("C601", firstDayMonth, lastDayMonth, "", "", "");
-                        oFilters= {
+                        oFilters = {
                             EX_WERKS: "C601",
                             IN_BUDAT_MKPF_FROM: firstDayMonth,
                             IN_BUDAT_MKPF_TO: lastDayMonth,
                             EX_LGORT: "",
-                            EX_LIFNR: ""                    
+                            EX_LIFNR: ""
                         }
                         this.getCentroCosto("C601");
                     }
                     let oModel = new JSONModel(oFilters);
                     this.getView().setModel(oModel, Constants.model.filterModel);
-                    await this.getStorageLocationSRV("C601");       
-                    this.getVendorSRV();   
+                    await this.getStorageLocationSRV("C601");
+                    this.getVendorSRV();
                     //Se avanza al siguiente proceso de los icontabbar
                     await this.getPlantSRV();
                     this.createFilterHomeDialog();
                 }
-                
-                
+
+
             },
             clearViews: function (header) {
                 let that = this;
                 let tabs = this.byId(Constants.ids.mainView.iconTabBar);
                 MessageBox.confirm(that._get_i18n("dialog_msg_10"), {
-                        onClose: async function (oAction) {
-                            if (oAction === MessageBox.Action.OK) {
-                                let sFragmentId = that.getView().createId(Constants.ids.icontabfilter_TT.id);
-                                let oTable = sap.ui.core.Fragment.byId(sFragmentId, Constants.ids.icontabfilter_TT.tableTransport);
-                                oTable.getRows().forEach(row => {
-                                    row.getCells()[0].setSelected(false);
-                                });
-                                let oData = {
-                                    items: []
-                                }
-                                let oModel = new JSONModel(oData);
-                                that.getOwnerComponent().setModel(oModel, Constants.model.palletModel);
-                                oData = {
-                                    pallets: []
-                                }
-                                oModel = new JSONModel(oData);
-                                that.getView().setModel(oModel, Constants.model.orderModel);
-                                let oInfo = {
-                                    typeMaterials: "",
-                                    pathTransport: "",
-                                    transport: "",
-                                    countItems: 0,
-                                    countPallets: 0,
-                                    weight: 0,
-                                    totalWeight: 0,
-                                    bultos: 0,
-                                    typeBulto: "",
-                                    nameT: "TRANSPORTISTA 01",
-                                    plate: "",
-                                    license: "",
-                                    startDate: "",
-                                    obs: "",
-                                    EX_LGORT: "",
-                                    brand: ""
-                                };
-                                oModel = new JSONModel(oInfo);
-                                that.getView().setModel(oModel, Constants.model.infoModel);
-                                that.checkTypeTransport(0);
-                                let count = 0;
-                                tabs.getItems().forEach(tab => {
-                                    if (count%2 == 0 && count>=2) {
-                                        tab.setEnabled(false);
-                                    }
-                                    count++;
-                                });
-                                let toDay = new Date();
-                                let firstDayMonth = new Date(toDay.getFullYear(), toDay.getMonth(), 1);
-                                let lastDayMonth = new Date(toDay.getFullYear(), toDay.getMonth() + 1, 0);
-                                firstDayMonth = that.formatDate(firstDayMonth);
-                                lastDayMonth = that.formatDate(lastDayMonth);     
-                                let oFilters = {};
-                                if (header == that._get_i18n("consignmentMaterials")) {
-                                    that.getView().getModel(Constants.model.infoModel).setProperty(Constants.properties.infoModel.property9, "X");
-                                    // that.getMaterialsSRV("C601", "20190101", lastDayMonth, "", "", "X");
-                                    oFilters= {
-                                        EX_WERKS: "C601",
-                                        IN_BUDAT_MKPF_FROM: "20190101",
-                                        IN_BUDAT_MKPF_TO: lastDayMonth,
-                                        EX_LGORT: "",
-                                        EX_LIFNR: ""                    
-                                    }
-                                    let oModel = new JSONModel();
-                                    that.getOwnerComponent().setModel(oModel, Constants.model.centroModel);
-                                    
-                                } else {
-                                    that.getView().getModel(Constants.model.infoModel).setProperty(Constants.properties.infoModel.property9, "");
-                                    // that.getMaterialsSRV("C601", firstDayMonth, lastDayMonth, "", "", "");
-                                    oFilters= {
-                                        EX_WERKS: "C601",
-                                        IN_BUDAT_MKPF_FROM: firstDayMonth,
-                                        IN_BUDAT_MKPF_TO: lastDayMonth,
-                                        EX_LGORT: "",
-                                        EX_LIFNR: ""                    
-                                    }
-                                    that.getCentroCosto("C601");
-                                }
-                                oModel = new JSONModel(oFilters);
-                                that.getView().setModel(oModel, Constants.model.filterModel);
-                                await that.getStorageLocationSRV("C601");       
-                                that.getVendorSRV();   
-                                let tab = that.byId(Constants.ids.mainView.iconTabBar);
-                                //Se avanza al siguiente proceso de los icontabbar
-                                await that.getPlantSRV();
-                                await that.createFilterHomeDialog();
-                                oModel = new JSONModel();
-                                that.getOwnerComponent().setModel(oModel, Constants.model.gdModel);
-
+                    onClose: async function (oAction) {
+                        if (oAction === MessageBox.Action.OK) {
+                            let sFragmentId = that.getView().createId(Constants.ids.icontabfilter_TT.id);
+                            let oTable = sap.ui.core.Fragment.byId(sFragmentId, Constants.ids.icontabfilter_TT.tableTransport);
+                            oTable.getRows().forEach(row => {
+                                row.getCells()[0].setSelected(false);
+                            });
+                            let oData = {
+                                items: []
                             }
+                            let oModel = new JSONModel(oData);
+                            that.getOwnerComponent().setModel(oModel, Constants.model.palletModel);
+                            oData = {
+                                pallets: []
+                            }
+                            oModel = new JSONModel(oData);
+                            that.getView().setModel(oModel, Constants.model.orderModel);
+                            let oInfo = {
+                                typeMaterials: "",
+                                pathTransport: "",
+                                transport: "",
+                                countItems: 0,
+                                countPallets: 0,
+                                weight: 0,
+                                totalWeight: 0,
+                                bultos: 0,
+                                typeBulto: "",
+                                nameT: "Transport TM",
+                                plate: "",
+                                license: "",
+                                startDate: "",
+                                obs: "",
+                                EX_LGORT: "",
+                                brand: ""
+                            };
+                            oModel = new JSONModel(oInfo);
+                            that.getView().setModel(oModel, Constants.model.infoModel);
+                            that.checkTypeTransport(0);
+                            let count = 0;
+                            tabs.getItems().forEach(tab => {
+                                if (count % 2 == 0 && count >= 2) {
+                                    tab.setEnabled(false);
+                                }
+                                count++;
+                            });
+                            let toDay = new Date();
+                            let firstDayMonth = new Date(toDay.getFullYear(), toDay.getMonth(), 1);
+                            let lastDayMonth = new Date(toDay.getFullYear(), toDay.getMonth() + 1, 0);
+                            firstDayMonth = that.formatDate(firstDayMonth);
+                            lastDayMonth = that.formatDate(lastDayMonth);
+                            let oFilters = {};
+                            if (header == that._get_i18n("consignmentMaterials")) {
+                                that.getView().getModel(Constants.model.infoModel).setProperty(Constants.properties.infoModel.property9, "X");
+                                // that.getMaterialsSRV("C601", "20190101", lastDayMonth, "", "", "X");
+                                oFilters = {
+                                    EX_WERKS: "C601",
+                                    IN_BUDAT_MKPF_FROM: "20190101",
+                                    IN_BUDAT_MKPF_TO: lastDayMonth,
+                                    EX_LGORT: "",
+                                    EX_LIFNR: ""
+                                }
+                                let oModel = new JSONModel();
+                                that.getOwnerComponent().setModel(oModel, Constants.model.centroModel);
+
+                            } else {
+                                that.getView().getModel(Constants.model.infoModel).setProperty(Constants.properties.infoModel.property9, "");
+                                // that.getMaterialsSRV("C601", firstDayMonth, lastDayMonth, "", "", "");
+                                oFilters = {
+                                    EX_WERKS: "C601",
+                                    IN_BUDAT_MKPF_FROM: firstDayMonth,
+                                    IN_BUDAT_MKPF_TO: lastDayMonth,
+                                    EX_LGORT: "",
+                                    EX_LIFNR: ""
+                                }
+                                that.getCentroCosto("C601");
+                            }
+                            oModel = new JSONModel(oFilters);
+                            that.getView().setModel(oModel, Constants.model.filterModel);
+                            await that.getStorageLocationSRV("C601");
+                            that.getVendorSRV();
+                            let tab = that.byId(Constants.ids.mainView.iconTabBar);
+                            //Se avanza al siguiente proceso de los icontabbar
+                            await that.getPlantSRV();
+                            await that.createFilterHomeDialog();
+                            oModel = new JSONModel();
+                            that.getOwnerComponent().setModel(oModel, Constants.model.gdModel);
+
                         }
-                    });
+                    }
+                });
             },
             //Esta funcion ocurre al momento de cambiar la seleccion en la lista de Guias de despacho
             //para asi guardar en el modelo guideModel la guia actualmente seleccionada 
@@ -838,11 +867,11 @@ sap.ui.define([
                     oButton.setVisible(false);
                     let count = 0;
                     tabs.getItems().forEach(tab => {
-                        if (count%2 == 0 && count>=4) {
+                        if (count % 2 == 0 && count >= 4) {
                             tab.setEnabled(false);
                         }
                         count++;
-                    });  
+                    });
                 }
             },
             //Funcion que se usa para la busqueda en la lista de guias de despacho, la cual busca tanto por EX_NAME1 (filter1),
@@ -1135,7 +1164,7 @@ sap.ui.define([
                 // });
                 //Aqui verificamos si el peso que se quiere ingresar hace que superemos el limite de peso del camion, si esto no sucede se crea el bulto
                 if (totalWeight + weight <= maxWeight) {
-                    if (weight > 0 && typeBulto != "" && target != ""  && target != source && bultos > 0) {
+                    if (weight > 0 && typeBulto != "" && target != "" && target != source && bultos > 0) {
                         //Obtenemos del OrderModel la propiedad pallets que contiene un arreglo de pallets
                         let aPallets = this.getView().getModel(Constants.model.orderModel).getProperty(Constants.properties.orderModel.property1);
                         newBulto.weight = weight.toString();
@@ -1178,22 +1207,22 @@ sap.ui.define([
                         oButtonCreate.setVisible(false);
                         oButtonDelete.setVisible(false);
                     } else {
-                        let msg = ""                        
+                        let msg = ""
                         if (bultos <= 0) {
                             msg = msg + this._get_i18n("dialog_msg_7") + "\n";
                         } else if (isNaN(bultos)) {
                             msg = msg + this._get_i18n("dialog_msg_6") + "\n"
-                        }                       
+                        }
                         if (typeBulto == "") {
                             msg = msg + this._get_i18n("dialog_msg_8") + "\n";
-                        } 
+                        }
                         if (target == "") {
                             msg = msg + this._get_i18n("dialog_msg_11") + "\n";
-                        } 
+                        }
                         if (target == source) {
                             msg = msg + this._get_i18n("dialog_msg_12") + "\n";
-                        } 
-                        if (weight <= 0 ) {
+                        }
+                        if (weight <= 0) {
                             msg = msg + this._get_i18n("dialog_msg_5") + "\n";
                         }
                         this._buildDialog(this._get_i18n("dialog_error"), "Error", msg).open();
@@ -1201,27 +1230,27 @@ sap.ui.define([
                     //sino se lanza un error y no se guarda el bulto
                 } else {
                     if (isNaN(weight)) {
-                        let msg = ""                        
+                        let msg = ""
                         if (bultos <= 0) {
                             msg = msg + this._get_i18n("dialog_msg_7") + "\n";
                         } else if (isNaN(bultos)) {
                             msg = msg + this._get_i18n("dialog_msg_6") + "\n"
-                        }                       
+                        }
                         if (typeBulto == "") {
                             msg = msg + this._get_i18n("dialog_msg_8") + "\n";
-                        } 
+                        }
                         if (target == "") {
                             msg = msg + this._get_i18n("dialog_msg_11") + "\n";
-                        } 
+                        }
                         if (target == source) {
                             msg = msg + this._get_i18n("dialog_msg_12") + "\n";
-                        } 
+                        }
                         msg = msg + this._get_i18n("dialog_msg_9") + "\n"
                         this._buildDialog(this._get_i18n("dialog_error"), "Error", msg).open();
                     } else {
-                         //TODO: Definir mensaje en español e ingles si es que se necesita
+                        //TODO: Definir mensaje en español e ingles si es que se necesita
                         MessageBox.error("You have surpassed the limit of " + maxWeight + " KG. \n" +
-                        "There is : " + Math.round(((totalWeight + weight) - maxWeight), -3) + " extra KG");
+                            "There is : " + Math.round(((totalWeight + weight) - maxWeight), -3) + " extra KG");
                     }
                 }
             },
@@ -1232,7 +1261,7 @@ sap.ui.define([
                 let weightNow = this.getView().getModel(Constants.model.infoModel).getProperty(Constants.properties.infoModel.property3)
                 oTable.getRows().forEach(item => {
                     let weight = parseFloat(item.getCells()[2].getText().trim().split(" ")[0]);
-                    if (weight < weightNow){
+                    if (weight < weightNow) {
                         item.getCells()[0].setEditable(false);
                         let path = item.getBindingContext(Constants.model.transportModel).getPath();
                         this.getOwnerComponent().getModel(Constants.model.transportModel).setProperty(path + Constants.properties.transportModel.property1, "Error")
@@ -1243,7 +1272,7 @@ sap.ui.define([
                     }
                 });
             },
-           
+
             //Funcion que creara la orden de envio
             //TODO: debemos redifinir esta funcion con los nuevos requerimientos
             createOrder: async function () {
@@ -1303,14 +1332,14 @@ sap.ui.define([
                 //     }
                 // });
             },
-            
+
             filterGD: async function () {
-                var that= this;
+                var that = this;
                 if (that._validaFiltros().length > 0) {
                     that._buildDialog(that._get_i18n("dialog_error"), "Error", that._get_i18n("dialog_msg_4") + " \n" + that._validaFiltros()).open();
                 } else {
-                    let oData= this.getView().getModel(Constants.model.filterModel).getData();
-                    let sTypeGD= this.getView().getModel(Constants.model.infoModel).getProperty(Constants.properties.infoModel.property9);
+                    let oData = this.getView().getModel(Constants.model.filterModel).getData();
+                    let sTypeGD = this.getView().getModel(Constants.model.infoModel).getProperty(Constants.properties.infoModel.property9);
                     this.getCentroCosto(oData.EX_WERKS);
                     let response = await this.getMaterialsSRV(oData.EX_WERKS, oData.IN_BUDAT_MKPF_FROM, oData.IN_BUDAT_MKPF_TO, oData.EX_LGORT, oData.EX_LIFNR, sTypeGD);
                     this.getCentroCosto(oData.EX_WERKS);
@@ -1326,7 +1355,7 @@ sap.ui.define([
                 let oStorages = this.getOwnerComponent().getModel(Constants.model.storageModel).getData();
                 let sSource = this.getView().getModel(Constants.model.filterModel).getProperty(Constants.properties.filterModel.property1);
                 oStorages.forEach(storage => {
-                    if (storage.EX_LGORT == sSource){
+                    if (storage.EX_LGORT == sSource) {
                         storage.enable = false;
                     }
                 });
@@ -1337,12 +1366,12 @@ sap.ui.define([
             _validaFiltros: function () {
                 var that = this;
                 var msg = "";
-                let oData= this.getView().getModel(Constants.model.filterModel).getData();
+                let oData = this.getView().getModel(Constants.model.filterModel).getData();
                 var EX_WERKS = oData.EX_WERKS
                 var EX_LGORT = oData.EX_LGORT
                 var IN_BUDAT_MKPF_FROM = oData.IN_BUDAT_MKPF_FROM;
                 var IN_BUDAT_MKPF_TO = oData.IN_BUDAT_MKPF_TO;
-                
+
                 if (EX_WERKS == "") {
                     msg = msg + "-" + that._get_i18n("plant") + "\n";
                 }
@@ -1378,12 +1407,12 @@ sap.ui.define([
                 tabs.setSelectedKey(Constants.model.gdModel);
                 let count = 0;
                 tabs.getItems().forEach(tab => {
-                    if (count%2 == 0) {
+                    if (count % 2 == 0) {
                         tab.setEnabled(true);
                     }
                     count++;
-                });  
-                this.filterGD();              
+                });
+                this.filterGD();
             },
 
             cerrarOrder: function () {
@@ -1392,11 +1421,11 @@ sap.ui.define([
             },
 
             getStorageLocation: function (oEvent) {
-                this.getView().getModel(Constants.model.filterModel).setProperty(Constants.properties.filterModel.property1,"");
-                this.getView().getModel(Constants.model.filterModel).setProperty(Constants.properties.filterModel.property2,"");               
+                this.getView().getModel(Constants.model.filterModel).setProperty(Constants.properties.filterModel.property1, "");
+                this.getView().getModel(Constants.model.filterModel).setProperty(Constants.properties.filterModel.property2, "");
                 let IN_WERKS = oEvent.getParameters().selectedItem.getKey();
-                this.getStorageLocationSRV(IN_WERKS);       
-                this.getVendorSRV();         
+                this.getStorageLocationSRV(IN_WERKS);
+                this.getVendorSRV();
             },
             handleLiveChange: function (oEvent) {
                 var oTextArea = oEvent.getSource(),
@@ -1420,7 +1449,7 @@ sap.ui.define([
                     IN_COST_CENTER_CONS: "",
                     IN_SHIP_POINT: oHeaderData.value[0].parameter.find(parameter => parameter.name == "SHIP_POINT").value,
                     EX_RESULTADO_EJECUCION: "",
-                    EX_DSC_EJECUCION : "",
+                    EX_DSC_EJECUCION: "",
                     EX_USR_EJECUCION: "",
                     ZTM_CM_FREIGHT_HEADER_POSITION: this.createItems(freightOrder),
                     ZTM_CM_FREIGHT_HEADER_RESULT: [
@@ -1442,10 +1471,23 @@ sap.ui.define([
                 let IN_SUPPL_STLOC = this.getView().getModel(Constants.model.filterModel).getProperty(Constants.properties.filterModel.property1);
                 let IN_ACCTASSCAT = this.getView().getModel(Constants.model.infoModel).getProperty(Constants.properties.infoModel.property9) == "X" ? "K" : "";
                 oData.pallets.forEach(oPackage => {
+                    let dataType = this.getOwnerComponent().getModel(Constants.model.typeBultosModel).getData();
+                    let IN_TRANS_GRP = "";
+                    dataType.forEach(type => {
+                        if (type.EX_VTEXT == oPackage.type) {
+                            IN_TRANS_GRP = type.EX_TRAGR;
+                        }
+                    });
+                    count = count.toString();
+                    if (count.length == 2) {
+                        count = "00" + count;
+                    } else if (count.length == 3) {
+                        count = "0" + count;
+                    }
                     oPackage.item.forEach(item => {
                         let newItem = {
                             IN_PACKAGE: oPackage.code,
-                            IN_PO_ITEM: count.toString(),
+                            IN_PO_ITEM: count,
                             IN_MATERIAL: item.materialCode,
                             IN_PLANT: IN_PLANT,
                             IN_STGE_LOC: oPackage.target,
@@ -1457,7 +1499,7 @@ sap.ui.define([
                             IN_ACCTASSCAT: IN_ACCTASSCAT,
                             IN_GL_ACCOUNT: "",
                             IN_COST_CENTER: item.ceco,
-                            IN_TRANS_GRP: oPackage.type
+                            IN_TRANS_GRP: IN_TRANS_GRP
                         };
                         items.push(newItem);
                         count = count + 10;
