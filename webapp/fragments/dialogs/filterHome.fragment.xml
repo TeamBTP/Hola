@@ -33,7 +33,7 @@
                             <f:FormElement label="{i18n>storageLocation}">
                                 <f:fields>
                                     <ComboBox selectedKey="{filterModel>/EX_LGORT}" showSecondaryValues= "true" items="{storageModel>/}">
-                                        <core:ListItem key="{storageModel>EX_LGORT}" text="{storageModel>EX_LGOBE}" additionalText="{storageModel>EX_LGORT}" />
+                                        <core:ListItem key="{storageModel>EX_LGORT}" enabled="{storageModel>enable}" text="{storageModel>EX_LGOBE}" additionalText="{storageModel>EX_LGORT}" />
                                     </ComboBox>
                                 </f:fields>
                             </f:FormElement>

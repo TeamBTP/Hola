@@ -42,6 +42,8 @@ sap.ui.define([
                     showCancelButton: false,
                     title: this._get_i18n("dialog_loading_data")
                 });
+                this.temps = [];
+                this.errors = {};
                 //Array de dialogs, aqui se guardaran todos los dialogs que usaremos para no tener que crearlos cada vez que se llamen
                 this.Dialogs = {}
                 //Aqui se guardara el dialog que se este usando en ese momento en la App
@@ -60,6 +62,8 @@ sap.ui.define([
                 oModel = new JSONModel(oData);
                 this.getOwnerComponent().setModel(oModel, Constants.model.palletModel);
                 //Se crea y guarda el modelo que contendra informacion util para distintas partes de la app
+                let toDay = new Date();
+                toDay = this.formatDate(toDay);
                 let oInfo = {
                     typeMaterials: "",
                     pathTransport: "",
@@ -73,7 +77,7 @@ sap.ui.define([
                     nameT: "Transport TM",
                     plate: "",
                     license: "",
-                    startDate: "",
+                    startDate: toDay,
                     obs: "",
                     EX_LGORT: "",
                     brand: ""
@@ -90,6 +94,14 @@ sap.ui.define([
                 this.getTransportType();
                 this.getCarrier();
                 this.getTypeBulto();
+                this.getUserInfo().then((resolve)=>{
+                    if (resolve.EX_RESPONSE == "S") {
+                        this.userConnected = resolve.EX_DATA;
+                    } else {
+                        console.log(resolve.EX_DATA);
+                    }
+                });
+                this.getMaterialsUser(this.userConnected);
             },
 
             //--------------------------------->FUNCIONES COMUNES<----------------------------------
@@ -134,6 +146,60 @@ sap.ui.define([
                 });
                 return dialog;
             },
+            _buildDialogFinish: function (_title, _state, _text) {
+                var oController = this;
+                var dialog = new sap.m.Dialog({
+                    title: _title,
+                    type: 'Message',
+                    state: _state,
+                    content: new sap.m.Text({
+                        text: _text
+                    }),
+                    beginButton: new sap.m.Button({
+                        text: oController._get_i18n("accept"),
+                        press: function () {
+                            dialog.close();
+                        }
+                    }),
+                    afterClose: function () {
+                        // oController.reiniciarFormulario();
+                        dialog.destroy();
+                        let tabs = oController.byId(Constants.ids.mainView.iconTabBar);
+                        let count = 0;
+                        tabs.getItems().forEach(tab => {
+                            if (count % 2 == 0 ) {
+                                tab.setEnabled(false);
+                            }
+                            count++;
+                        });
+                        location.reload();
+                        
+                    }
+                });
+                return dialog;
+            },
+            getUserInfo: function () {
+                let that = this;
+                return new Promise(function(resolve, reject) {
+                    try {
+                        if(top.sap.ushell!= undefined){
+                            let user = top.sap.ushell.Container.getUser();
+                            that.userConnected = user.getEmail() != undefined ? user.getEmail() : 'usuarioDefecto';
+                        }else{
+                            that.userConnected ='usuarioDefecto';
+                        }
+                        let res = { EX_RESPONSE: "S", EX_DATA: that.userConnected };
+                        resolve(res);
+
+                    } catch (e) {
+                        console.log('No se logro obtener el usuario', e);
+                        that._buildDialog(that._get_i18n("dialog_error"), "Error", that._get_i18n("dialog_msg_9")).open();
+                        let res = { EX_RESPONSE: "E", EX_DATA: e };
+                        resolve(res);
+                    }
+                });
+
+            },
             formatDate: function (date) {
                 var d = new Date(date),
                     month = '' + (d.getMonth() + 1),
@@ -175,15 +241,74 @@ sap.ui.define([
                 var oData = {
 
                 };
-                this.oLoaderData.open();
                 let response = await this.requestCAP(URL, oData, 'GET');
-                this.oLoaderData.close();
                 if (response.EX_RESPONSE == "S") {
                     if (Object.entries(response.EX_DATA).length === 0) {
                         this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " CENTRO_COSTO-" + centro).open();
                     } else {
                         let oModel = new JSONModel(response.EX_DATA);
                         this.getOwnerComponent().setModel(oModel, Constants.model.centroModel);
+                    }
+                } else {
+                    this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
+                }
+
+            },
+            getSourceStorage: async function () {
+                var URL = "tmsmanifest/parameters/Category?$filter=(name eq 'SOURCE STORAGE LOCATION')&$expand=parameter($filter=active%20eq%20true)";
+                var oData = {
+
+                };
+                let response = await this.requestCAP(URL, oData, 'GET');
+                if (response.EX_RESPONSE == "S") {
+                    if (Object.entries(response.EX_DATA).length === 0) {
+                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " CENTRO_COSTO-" + centro).open();
+                    } else {
+                        // console.log(response.EX_DATA);
+                        let oStorages = this.getOwnerComponent().getModel(Constants.model.storageModel).getData();
+                        oStorages.forEach(storage => {
+                            storage.enable = false;
+                        });
+                        oStorages.forEach(storage => {
+                            response.EX_DATA.value[0].parameter.forEach(sourceStorage => {
+                                if (storage.EX_LGORT == sourceStorage.value) {
+                                    storage.enable = true;
+                                }
+                            });
+                        });
+                        this.getOwnerComponent().getModel(Constants.model.storageModel).setData(oStorages);
+                        // let oModel = new JSONModel();
+                        // this.getOwnerComponent().setModel(oModel, Constants.model.sourceStorageModel);
+                    }
+                } else {
+                    this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
+                }
+            },
+            getTargetStorage: async function () {
+                var URL = "tmsmanifest/parameters/Category?$filter=(name eq 'TARGET STORAGE LOCATION')&$expand=parameter($filter=active%20eq%20true)";
+                var oData = {
+
+                };
+                let response = await this.requestCAP(URL, oData, 'GET');
+                if (response.EX_RESPONSE == "S") {
+                    if (Object.entries(response.EX_DATA).length === 0) {
+                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " CENTRO_COSTO-" + centro).open();
+                    } else {
+                        // console.log(response.EX_DATA);
+                        let oStorages = this.getOwnerComponent().getModel(Constants.model.storageModel).getData();
+                        oStorages.forEach(storage => {
+                            storage.enable = false;
+                        });
+                        oStorages.forEach(storage => {
+                            response.EX_DATA.value[0].parameter.forEach(targetStorage => {
+                                if (storage.EX_LGORT == targetStorage.value) {
+                                    storage.enable = true;
+                                }
+                            });
+                        });
+                        this.getOwnerComponent().getModel(Constants.model.storageModel).setData(oStorages);
+                        // let oModel = new JSONModel();
+                        // this.getOwnerComponent().setModel(oModel, Constants.model.sourceStorageModel);
                     }
                 } else {
                     this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
@@ -264,9 +389,7 @@ sap.ui.define([
                 var oData = {
 
                 };
-                this.oLoaderData.open();
                 let response = await this.requestCAP(URL, oData, 'GET');
-                this.oLoaderData.close();
                 if (response.EX_RESPONSE == "S") {
                     if (Object.entries(response.EX_DATA).length === 0) {
                         this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " HEADER DE LA FREIGTH ORDER").open();
@@ -285,9 +408,7 @@ sap.ui.define([
                 var oData = {
 
                 };
-                this.oLoaderData.open();
                 let response = await this.requestCAP(URL, oData, 'GET');
-                this.oLoaderData.close();
                 if (response.EX_RESPONSE == "S") {
                     if (Object.entries(response.EX_DATA).length === 0) {
                         this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " Delivery Order").open();
@@ -300,11 +421,18 @@ sap.ui.define([
                     this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
                 }
             },
-
+            postCheckGD: async function (data) {
+                var URL = "tmsmanifest/cargo/CheckDeliveryOrder";
+                this.oLoaderData.open();
+                let response = await this.requestCAP(URL, data, 'POST');
+                this.oLoaderData.close();
+                return response.EX_DATA.value
+            },
             postCreateFreightOrder: async function (data) {
                 var URL = "tmsmanifest/cargo/CreateFreightOrder";
                 this.oLoaderData.open();
                 let response = await this.requestCAP(URL, data, 'POST');
+                await this.deleteMaterials(this.temps);
                 this.oLoaderData.close();
                 console.log(response);
                 // if (response.EX_RESPONSE == "S") {
@@ -320,14 +448,12 @@ sap.ui.define([
                 // }
 
             },
-            getMaterial: async function (deliveryOrder, materialCode) {
-                var URL = "tmsmanifest/cargo/Material?$filter=(deliveryOrder eq '" + deliveryOrder + "' and materialCode eq '" + materialCode + "')";
+            getMaterial: async function (deliveryOrder, code, userConnected) {
+                var URL = "tmsmanifest/cargo/Material?$filter=(deliveryOrder eq '" + deliveryOrder + "' and item eq '" + code + "' and userMail eq '" + userConnected + "')";
                 var oData = {
 
                 };
-                this.oLoaderData.open();
                 let response = await this.requestCAP(URL, oData, 'GET');
-                this.oLoaderData.close();
                 if (response.EX_RESPONSE == "S") {
                     if (Object.entries(response.EX_DATA).length === 0) {
                         this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " Delivery Order").open();
@@ -340,18 +466,91 @@ sap.ui.define([
                     this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Category" + this._get_i18n("dialog_msg_2_1")).open();
                 }
             },
-            postMaterial: async function (data) {
-                var URL = "tmsmanifest/cargo/Material";
+            getMaterialsUser: async function (userConnected) {
+                var URL = "tmsmanifest/cargo/Material?$filter=("+ "userMail eq '" + userConnected + "')";
+                var oData = {
+
+                };
+                this.oLoaderData.open();
+                let response = await this.requestCAP(URL, oData, 'GET');
+                this.oLoaderData.close();
+                if (response.EX_RESPONSE == "S") {
+                    if (Object.entries(response.EX_DATA).length === 0) {
+                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " Material").open();
+                    } else {
+                        let array = [];
+                        response.EX_DATA.value.forEach(material => {
+                            array.push(material.ID)
+                        });             
+                        this.deleteMaterials(array);
+                    }
+                } else {
+                    this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/parameters/Material" + this._get_i18n("dialog_msg_2_1")).open();
+                }
+            },
+            getLog: async function (code, deliveryOrderCode) {
+                var URL = "tmsmanifest/cargo/Log?$filter=item eq '" + code + "' and deliveryOrderCode eq '" + deliveryOrderCode + "'";
+                var oData = {
+
+                };
+                let response = await this.requestCAP(URL, oData, 'GET');
+                if (response.EX_RESPONSE == "S") {
+                    if (Object.entries(response.EX_DATA).length === 0) {
+                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " Log").open();
+                    } else {                        
+                        return response.EX_DATA.value;
+                    }
+                } else {
+                    this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/cargo/Log" + this._get_i18n("dialog_msg_2_1")).open();
+                }
+            },
+            getFreighData: async function (code) {
+                var URL = "tmsmanifest/cargo/FreightOrder?$filter=(code eq '"+ code +"')&$expand=package($expand=item($expand=deliveryOrder))";
+                var oData = {
+
+                };
+                let response = await this.requestCAP(URL, oData, 'GET');
+                if (response.EX_RESPONSE == "S") {
+                    if (Object.entries(response.EX_DATA).length === 0) {
+                        this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_3") + " Log").open();
+                    } else {                        
+                        return response.EX_DATA.value;
+                    }
+                } else {
+                    this._buildDialog(this._get_i18n("dialog_error"), "Error", this._get_i18n("dialog_msg_2") + "/tmsmanifest/cargo/Log" + this._get_i18n("dialog_msg_2_1")).open();
+                }
+            },
+            postCreateLog: async function (data) {
+                var URL = "tmsmanifest/cargo/CreateLog";
                 this.oLoaderData.open();
                 let response = await this.requestCAP(URL, data, 'POST');
                 this.oLoaderData.close();
             },
-            deleteMaterial: async function (ID) {
-                var URL = "tmsmanifest/cargo/Material(" + ID + ")";
-                var oData = {
-                };
+            postMaterial: async function (data) {
+                var URL = "tmsmanifest/cargo/CreateMaterial";
                 this.oLoaderData.open();
-                let response = await this.requestCAP(URL, oData, 'Delete');
+                let response = await this.requestCAP(URL, data, 'POST');
+                this.temps.push(response.EX_DATA.value);
+                this.oLoaderData.close();
+            },
+            deleteMaterial: async function (ID) {
+                var URL = "tmsmanifest/cargo/DeleteMaterial";
+                var oData = {
+                    material_ID: [ID]
+                };
+                this.temps.splice(this.temps.indexOf(ID), 1)
+                this.oLoaderData.open();
+                let response = await this.requestCAP(URL, oData, 'POST');
+                this.oLoaderData.close();
+            },
+            deleteMaterials: async function (oData) {
+                var URL = "tmsmanifest/cargo/DeleteMaterial";
+                this.oLoaderData.open();
+                oData = {
+                    material_ID: oData
+                }
+                let response = await this.requestCAP(URL, oData, 'POST');
+                this.temps = [];
                 this.oLoaderData.close();
             },
             //Funcion encargada de obtener la data (tipo de transportes) desde el servicio de ERP la cual es guardada en un modelo 
@@ -364,8 +563,6 @@ sap.ui.define([
                 oController.oLoaderData.open();
                 try {
                     let data = await oController.RequestSAPGETPromise(model, filters, service, oData);
-                    console.log(data);
-
                     if (data[0].EX_RESULTADO_EJECUCION == "S") {
                         //Response Ok
                         let oDataModel = [];
@@ -421,14 +618,12 @@ sap.ui.define([
                     new sap.ui.model.Filter("IN_SOBKZ", sap.ui.model.FilterOperator.EQ, IN_SOBKZ) //free "" y consig "X"
                 ]
                 var oData = {};
-                oController.oLoaderData.open();
                 try {
                     let data = await oController.RequestSAPGETPromise(model, filters, service, oData);
+                    let oHeaderData = await this.getHeaderData();
                     if (data[0].EX_RESULTADO_EJECUCION == "S") {
                         //Response Ok        
-                        console.log(data);
-
-                        let oDataModel = [];
+                        var oDataModel = [];
                         let json = {};
                         let EX_MBLN_ANT = "";
                         for (let index = 0; index < data.length; index++) {
@@ -437,7 +632,9 @@ sap.ui.define([
                             json.deliveryOrder = EX_MBLN;
                             json.provider = element["EX_NAME1"];
                             json.date = element["EX_BUDAT_MKPF"];
-                            json.gr = element["EX_XBLNR_MKPF"]
+                            json.gr = element["EX_XBLNR_MKPF"];
+                            json.EX_MJAHR = element["EX_MJAHR"].trim();
+                            // json.highlight = "Success"
                             let detail = []
                             let item = {}
                             item.code = element["EX_ZEILE"].trim();
@@ -445,14 +642,21 @@ sap.ui.define([
                             item.unitMeasure = element["EX_ERFME"].trim();
                             item.price = element["EX_DMBTR"].trim();
                             item.currency = element["EX_WAERS"].trim();
-                            item.materialCode = element["EX_MATNR"].trim();
-                            item.description = element["EX_SGTXT"].trim();
+                            item.EX_SAKTO = element["EX_SAKTO"];
+                            item.status = false;
                             if (IN_SOBKZ == "X") {
                                 item.ceco = this.getOwnerComponent().getModel(Constants.model.centroModel).getProperty("/value/0/parameter/0/value");
                                 item.description = element["EX_SGTXT"].trim();
+                                item.materialCode = element["EX_MATNR"].trim();
                             } else {
                                 item.ceco = element["EX_KOSTL"].trim();
-                                item.description = element["EX_MAKTX"].trim();
+                                if (element["EX_MATNR"].trim() == "") {
+                                    item.materialCode = oHeaderData.value[0].parameter.find(parameter => parameter.name == "MATERIAL_FREE_TEXT").value,
+                                    item.description = element["EX_TXZ01"].trim();
+                                } else { 
+                                    item.materialCode = element["EX_MATNR"].trim();
+                                    item.description = element["EX_MAKTX"].trim();
+                                }
                             }
                             detail.push(item);
                             let elementNext = data[index + 1];
@@ -466,12 +670,21 @@ sap.ui.define([
                                     item.currency = elementNext["EX_WAERS"].trim();
                                     item.materialCode = elementNext["EX_MATNR"].trim();
                                     item.description = elementNext["EX_SGTXT"].trim();
+                                    item.status = false;
+                                    item.EX_SAKTO = element["EX_SAKTO"];
                                     if (IN_SOBKZ == "X") {
                                         item.ceco = this.getOwnerComponent().getModel(Constants.model.centroModel).getProperty("/value/0/parameter/0/value");
                                         item.description = elementNext["EX_SGTXT"].trim();
+                                        item.materialCode = elementNext["EX_MATNR"].trim();
                                     } else {
                                         item.ceco = elementNext["EX_KOSTL"].trim();
-                                        item.description = elementNext["EX_MAKTX"].trim();
+                                        if (elementNext["EX_MATNR"].trim() == "") {
+                                            item.materialCode = oHeaderData.value[0].parameter.find(parameter => parameter.name == "MATERIAL_FREE_TEXT").value,
+                                            item.description = elementNext["EX_TXZ01"].trim();
+                                        } else { 
+                                            item.materialCode = elementNext["EX_MATNR"].trim();
+                                            item.description = elementNext["EX_MAKTX"].trim();
+                                        }
                                     }
                                     detail.push(item);
                                     index++;
@@ -500,41 +713,98 @@ sap.ui.define([
                             oDataModel.push(json);
                             json = {};
                         }
-                        oDataModel.forEach(async function (GD) {
-                            // let response = await oController.getDeliveryOrder(GD.deliveryOrder);
-                            // if (response.value.length > 0) {
-                            //     GD.detail.forEach(item => {
-                            //         if (response.value[0].item.find(item => item.materialCode === item.materialCode) != undefined) {
-                            //             item.selected = true;
-                            //             item.editable = false;
-                            //         }
-                            //     });
-                            // }
-                            GD.detail.forEach(async item => {
-                                let response = await oController.getMaterial(GD.deliveryOrder, item.materialCode);
-                                if (response.value.length > 0) {
-                                    item.selected = true;
-                                    item.editable = false;
-                                }
-                            });
-                        });
-
+                        let jsonCAP = {
+                            userMail: oController.userConnected,
+                            deliveryOrders: oDataModel
+                        }
+                        oDataModel = await oController.postCheckGD(jsonCAP);
                         let oModel = new JSONModel(oDataModel);
                         oController.getOwnerComponent().setModel(oModel, Constants.model.gdModel);
                     } else if (data[0].EX_RESULTADO_EJECUCION == "E") {
                         oController._buildDialog(oController._get_i18n("dialog_information"), "Information", data[0].EX_DSC_EJECUCION).open();
+                        let oModel = new JSONModel();
+                        oController.getOwnerComponent().setModel(oModel, Constants.model.guideModel);
+                        oController.getOwnerComponent().setModel(oModel, Constants.model.gdModel);
                         return "E"
                     } else {
                         oController._buildDialog(oController._get_i18n("dialog_error"), "Error", oController._get_i18n("dialog_msg_1") + service).open();
                     }
-                    oController.oLoaderData.close();
                 } catch (e) {
-                    oController.oLoaderData.close();
                     //Response Error
                     console.log(e)
                     oController._buildDialog(oController._get_i18n("dialog_error"), "Error", oController._get_i18n("dialog_msg_1") + service).open();
                 }
             },
+            // checkGD: async function (oDataModel){
+            //     console.log(oDataModel);
+                
+            //     this.oLoaderData.open();
+            //     let oController = this;
+            //     for (const GD of oDataModel) {
+            //         let response = await oController.getDeliveryOrder(GD.deliveryOrder);
+            //         // let oDataLogs = this.getOwnerComponent().getModel(Constants.model.logsModel).getData();
+            //         // if (oDataLogs.length > 0 ) {
+            //         //     let errors = {}
+            //         //     oDataLogs.forEach(log => {
+            //         //         if (errors[log.freightOrderCode] != undefined){
+            //         //             errors[log.freightOrderCode].push([log.msg, log.step, log.status]);
+            //         //         } else {
+            //         //             errors[log.freightOrderCode] = [[log.msg, log.step, log.status]]
+            //         //         }
+            //         //     });
+            //         //     for (const key in errors) {
+            //         //         if (errors.hasOwnProperty(key)) {
+            //         //             const element = errors[key];
+            //         //             let freight = await oController.getFreighData(key);
+            //         //             freight[0].package.forEach(oPackage => {
+            //         //                 oPackage.item.forEach(item => {
+            //         //                     if (item.deliveryOrder.code == GD.deliveryOrder){
+            //         //                         GD.detail.forEach(itemGD => {
+            //         //                             if (itemGD.code == item.code){
+            //         //                                 itemGD.status = true;
+            //         //                                 oController.errors[GD.deliveryOrder +"-"+ itemGD.code] = element;
+            //         //                             }
+            //         //                         });
+            //         //                     }
+            //         //                 });
+            //         //             });
+                                
+            //         //         }
+            //         //     }
+                        
+                        
+                        
+            //         // }
+            //         if (response.value.length > 0) {
+            //             let countItems = GD.detail.length;
+            //             let count = 0
+            //             GD.detail.forEach(item => {
+            //                 if (response.value[0].item.find(itemS => itemS.code === item.code) != undefined) {
+            //                     item.selected = true;
+            //                     item.editable = false;
+            //                     count = count + 1;
+            //                 }
+            //             });
+            //             if (count == countItems) {
+            //                 GD.status = "processed";
+            //                 GD.visible = false;
+            //                 GD.highlight = "Error"
+            //             }
+            //         }
+            //         GD.detail.forEach(async item => {
+            //             let response = await oController.getMaterial(GD.deliveryOrder, item.code, oController.userConnected);
+            //             if (response != undefined) {
+            //                 if (response.value.length > 0) {
+            //                     item.selected = true;
+            //                     item.editable = false;
+            //                 }
+            //             }
+            //         });
+            //     };
+            //     this.oLoaderData.close();
+            //     let oModel = new JSONModel(oDataModel);
+            //     oController.getOwnerComponent().setModel(oModel, Constants.model.gdModel);
+            // },
             //Funcion encargada de obtener la data (Plantas/centro) desde el servicio de ERP la cual es guardada en un modelo 
             getPlantSRV: async function () {
                 var oController = this;
@@ -544,7 +814,6 @@ sap.ui.define([
                     new sap.ui.model.Filter("IN_BUKRS", sap.ui.model.FilterOperator.EQ, "CP01"),
                 ]
                 var oData = {};
-                oController.oLoaderData.open();
                 try {
                     let data = await oController.RequestSAPGETPromise(model, filters, service, oData);
                     if (data[0].EX_RESULTADO_EJECUCION == "S") {
@@ -556,9 +825,7 @@ sap.ui.define([
                     } else {
                         oController._buildDialog(oController._get_i18n("dialog_error"), "Error", oController._get_i18n("dialog_msg_1") + service).open();
                     }
-                    oController.oLoaderData.close();
                 } catch (e) {
-                    oController.oLoaderData.close();
                     //Response Error
                     console.log(e)
                     oController._buildDialog(oController._get_i18n("dialog_error"), "Error", oController._get_i18n("dialog_msg_1") + service).open();
@@ -578,8 +845,10 @@ sap.ui.define([
                     let data = await oController.RequestSAPGETPromise(model, filters, service, oData);
                     if (data[0].EX_RESULTADO_EJECUCION == "S") {
                         //Response Ok
+                        
                         let oModel = new JSONModel(data);
                         oController.getOwnerComponent().setModel(oModel, Constants.model.storageModel);
+                        await this.getSourceStorage();
                     } else if (data[0].EX_RESULTADO_EJECUCION == "E") {
                         oController._buildDialog(oController._get_i18n("dialog_error"), "Error", data[0].EX_DSC_EJECUCION).open();
                     } else {
@@ -622,6 +891,115 @@ sap.ui.define([
                     oController._buildDialog(oController._get_i18n("dialog_error"), "Error", oController._get_i18n("dialog_msg_1") + service).open();
                 }
             },
+            postFreightOrder: async function (json, oPackages) {
+                var oController = this;
+                var model = oController.getOwnerComponent().getModel("MODEL_ZTM_CARGO_MANIFEST_SRV");
+                var service = "/ZTM_CM_FREIGHT_HEADERSet";
+                var filters = []
+                var oData = json;
+                oController.oLoaderData.open();
+                try {                    
+                    let data = await oController.RequestSAPPOSTPromise(model, service, oData);
+                    console.log(data);
+                    let tag = true;
+                    let errors = {
+                        STO: [],
+                        CGR: [],
+                        COD: []
+                    }
+                    let jsonErrors = {
+                        logs: []
+                    };
+                    let msgFinal = "";
+                    data.ZTM_CM_FREIGHT_HEADER_RESULT.results.forEach(result => {
+                        if (result.EX_STEP != ""){
+                            oPackages.forEach(oPackage => {
+                                oPackage.item.forEach(item => {
+                                    let error = {
+                                        status: result.EX_RESULTADO_EJECUCION,
+                                        deliveryOrderCode: item.deliveryOrder,
+                                        item: item.code,
+                                        step: result.EX_STEP,
+                                        msg: result.EX_DSC_EJECUCION
+                                    };
+                                    if (result.EX_STEP == "STO" && result.EX_RESULTADO_EJECUCION == "S") {
+                                        msgFinal = oController._get_i18n("dialog_msg_17");
+                                    }
+                                    jsonErrors.logs.push(error);
+                                });
+                            });
+                        }
+                        switch (result.EX_STEP) {
+                            case "STO":
+                                if (result.EX_RESULTADO_EJECUCION == "E") {
+                                    errors.STO.push(result.EX_DSC_EJECUCION);
+                                    tag = false;
+                                } else if (result.EX_RESULTADO_EJECUCION == "S") {
+                                    errors.STO.push(result.EX_DSC_EJECUCION);
+                                }                     
+                                break;
+                            case "CGR":
+                                if (result.EX_RESULTADO_EJECUCION == "E") {
+                                    errors.CGR.push(result.EX_DSC_EJECUCION);
+                                    tag = false;
+                                } else if (result.EX_RESULTADO_EJECUCION == "S") {
+                                    errors.CGR.push(result.EX_DSC_EJECUCION);
+                                }                   
+                                break;
+                            case "COD":
+                                if (result.EX_RESULTADO_EJECUCION == "E") {
+                                    errors.COD.push(result.EX_DSC_EJECUCION);
+                                    tag = false;
+                                } else if (result.EX_RESULTADO_EJECUCION == "S") {
+                                    errors.COD.push(result.EX_DSC_EJECUCION);
+                                }                   
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                    if (tag) {
+                        let msg = ""
+                        for (const key in errors) {
+                            if (errors.hasOwnProperty(key) && errors[key].length != 0) {
+                                const element = errors[key];
+                                msg = msg + oController._get_i18n(key) + ":\n";
+                                element.forEach(error => {
+                                    msg = msg + "- " + error + "\n";
+                                });
+                                msg = msg + "\n";
+                            } else {
+                                msg = msg + oController._get_i18n(key) + ": " + oController._get_i18n("dialog_msg_14") + "\n\n";
+                            }
+                        }
+                        await oController.postCreateLog(jsonErrors);
+                        return ["Success", msg];
+                    } else {
+                        let msg = ""
+                        for (const key in errors) {
+                            if (errors.hasOwnProperty(key) && errors[key].length != 0) {
+                                const element = errors[key];
+                                msg = msg + oController._get_i18n(key) + ":\n";
+                                element.forEach(error => {
+                                    msg = msg + "- " + error + "\n";
+                                });
+                                msg = msg + "\n";
+                            } else {
+                                msg = msg + oController._get_i18n(key) + ": " + oController._get_i18n("dialog_msg_14") + "\n\n";
+                            }
+                        }
+                        msg = msg + msgFinal;
+                        await oController.postCreateLog(jsonErrors);
+                        return ["Error", msg];
+                    }
+                    oController.oLoaderData.close();
+                } catch (e) {
+                    oController.oLoaderData.close();
+                    //Response Error
+                    console.log(e)
+                    oController._buildDialog(oController._get_i18n("dialog_error"), "Error", oController._get_i18n("dialog_msg_1") + service).open();
+                }
+            },
             RequestSAPGETPromise: function (Model, filters, service, oData) {
                 return new Promise(function (resolve, reject) {
                     Model.setUseBatch(false);
@@ -636,6 +1014,20 @@ sap.ui.define([
                         }
                     })
 
+                })
+            },
+            RequestSAPPOSTPromise: function (Model, service, oData) {
+                return new Promise(function (resolve, reject) {
+                    Model.setUseBatch(false);
+                    Model.create(service, oData, {
+                        async: true,
+                        success: function (oRespon, response) {
+                            resolve(oRespon);
+                        },
+                        error: function (oError) {
+                            reject(oError);
+                        }
+                    })
                 })
             },
             //DATA DE JSON
@@ -692,10 +1084,12 @@ sap.ui.define([
                 }
             },
             getMaterials: async function (oEvent) {
+                this.oLoaderData.open();
                 let tabs = this.byId(Constants.ids.mainView.iconTabBar);
                 let tag = true;
                 if (tabs.getItems()[4].getEnabled() == true) {
                     let header = oEvent.getSource().getProperty("header");
+                    this.getMaterialsUser(this.userConnected);
                     this.clearViews(header);
                 } else {
                     let toDay = new Date();
@@ -717,7 +1111,6 @@ sap.ui.define([
                         }
                         let oModel = new JSONModel();
                         this.getOwnerComponent().setModel(oModel, Constants.model.centroModel);
-
                     } else {
                         this.getView().getModel(Constants.model.infoModel).setProperty(Constants.properties.infoModel.property9, "");
                         // this.getMaterialsSRV("C601", firstDayMonth, lastDayMonth, "", "", "");
@@ -730,6 +1123,9 @@ sap.ui.define([
                         }
                         this.getCentroCosto("C601");
                     }
+                    let sFragmentId = this.getView().createId(Constants.ids.icontabfilter_gd.id);
+                    let oColumn = sap.ui.core.Fragment.byId(sFragmentId, Constants.ids.icontabfilter_gd.columnCeco);
+                    oColumn.setVisible(false);
                     let oModel = new JSONModel(oFilters);
                     this.getView().setModel(oModel, Constants.model.filterModel);
                     await this.getStorageLocationSRV("C601");
@@ -737,9 +1133,8 @@ sap.ui.define([
                     //Se avanza al siguiente proceso de los icontabbar
                     await this.getPlantSRV();
                     this.createFilterHomeDialog();
+                    this.oLoaderData.close();
                 }
-
-
             },
             clearViews: function (header) {
                 let that = this;
@@ -762,6 +1157,8 @@ sap.ui.define([
                             }
                             oModel = new JSONModel(oData);
                             that.getView().setModel(oModel, Constants.model.orderModel);
+                            let toDay = new Date();
+                            toDay = that.formatDate(toDay);
                             let oInfo = {
                                 typeMaterials: "",
                                 pathTransport: "",
@@ -775,7 +1172,7 @@ sap.ui.define([
                                 nameT: "Transport TM",
                                 plate: "",
                                 license: "",
-                                startDate: "",
+                                startDate: toDay,
                                 obs: "",
                                 EX_LGORT: "",
                                 brand: ""
@@ -790,7 +1187,7 @@ sap.ui.define([
                                 }
                                 count++;
                             });
-                            let toDay = new Date();
+                            toDay = new Date();
                             let firstDayMonth = new Date(toDay.getFullYear(), toDay.getMonth(), 1);
                             let lastDayMonth = new Date(toDay.getFullYear(), toDay.getMonth() + 1, 0);
                             firstDayMonth = that.formatDate(firstDayMonth);
@@ -806,6 +1203,9 @@ sap.ui.define([
                                     EX_LGORT: "",
                                     EX_LIFNR: ""
                                 }
+                                let sFragmentId = that.getView().createId(Constants.ids.icontabfilter_gd.id);
+                                let oColumn = sap.ui.core.Fragment.byId(sFragmentId, Constants.ids.icontabfilter_gd.columnCeco);
+                                oColumn.setVisible(false);
                                 let oModel = new JSONModel();
                                 that.getOwnerComponent().setModel(oModel, Constants.model.centroModel);
 
@@ -823,6 +1223,7 @@ sap.ui.define([
                             }
                             oModel = new JSONModel(oFilters);
                             that.getView().setModel(oModel, Constants.model.filterModel);
+                            that.oLoaderData.open();
                             await that.getStorageLocationSRV("C601");
                             that.getVendorSRV();
                             let tab = that.byId(Constants.ids.mainView.iconTabBar);
@@ -831,6 +1232,7 @@ sap.ui.define([
                             await that.createFilterHomeDialog();
                             oModel = new JSONModel();
                             that.getOwnerComponent().setModel(oModel, Constants.model.gdModel);
+                            that.oLoaderData.close();
 
                         }
                     }
@@ -923,9 +1325,11 @@ sap.ui.define([
                         });
                         //Añadimos al item 3 propiedades que eran de su guia para asi cuando se añada al bulto identificar
                         //de que Guia provenia 
+                        oItem.EX_MJAHR = oModel.getProperty(Constants.properties.guideModel.property5);
                         oItem.deliveryOrder = oModel.getProperty(Constants.properties.guideModel.property1);
                         oItem.provider = oModel.getProperty(Constants.properties.guideModel.property2);
                         oItem.date = oModel.getProperty(Constants.properties.guideModel.property3);
+                        oItem.type = this.getView().getModel(Constants.model.infoModel).getProperty(Constants.properties.infoModel.property9);
                         //Obtenemos el modelo que contendra todos los items que queremos añadir
                         let oItemsModel = that.getView().getModel(Constants.model.palletModel);
                         //Ahora obtenemos la data del modelo la cual tiene en items un arreglo de items, y a este le añadiremos
@@ -952,9 +1356,12 @@ sap.ui.define([
                     MessageToast.show(msgSuccess + ' items were added.');
                 }
                 itemsAceptados.forEach(item => {
-                    let dataItem = {
-                        deliveryOrder: item.deliveryOrder,
-                        materialCode: item.materialCode
+                    let dataItem = { 
+                        material: {
+                            deliveryOrder: item.deliveryOrder,
+                            item: item.code,
+                            userMail:  this.userConnected
+                        } 
                     }
                     that.postMaterial(dataItem);
                 });
@@ -1002,7 +1409,9 @@ sap.ui.define([
                 let itemDelete = oPalletModel.getProperty(path);
                 //Del item obtenemos el deliveryOrder para identificar de que guia proviene y desbloquear su uso para agregarlo en otro bulto posteriormente
                 let nGuide = itemDelete.deliveryOrder;
-                let response = await this.getMaterial(itemDelete.deliveryOrder, itemDelete.materialCode);
+                this.oLoaderData.open();
+                let response = await this.getMaterial(itemDelete.deliveryOrder, itemDelete.code, this.userConnected);
+                this.oLoaderData.close();
                 await this.deleteMaterial(response.value[0].ID)
                 let guide = oGDModel.getData().find(guide => guide.deliveryOrder == nGuide);
                 //Obtenemos el item original que viene del modelo GD
@@ -1101,7 +1510,10 @@ sap.ui.define([
                 }
             },
             //Funcion que abre el dialgo de para crear un bulto donde se pedira los datos del peso de este
-            createPallet: function () {
+            createPallet: async function () {
+                this.oLoaderData.open();
+                await this.getTargetStorage();
+                this.oLoaderData.close();
                 //Llamamos a la funcion que creara el dialogo y nos lo retornara y asi podremos abrirlo
                 this.createDialogs(Constants.dialogs.dialog1.name, Constants.dialogs.dialog1.id, Constants.dialogs.dialog1.route).open();
             },
@@ -1166,11 +1578,16 @@ sap.ui.define([
                 if (totalWeight + weight <= maxWeight) {
                     if (weight > 0 && typeBulto != "" && target != "" && target != source && bultos > 0) {
                         //Obtenemos del OrderModel la propiedad pallets que contiene un arreglo de pallets
+                        dataStorage.forEach(storage => {
+                            if (storage.EX_LGORT == target){
+                                target = storage.EX_LGOBE;
+                            }
+                        });
                         let aPallets = this.getView().getModel(Constants.model.orderModel).getProperty(Constants.properties.orderModel.property1);
                         newBulto.weight = weight.toString();
                         newBulto.quantityItem = parseInt(newBulto.item.length);
                         newBulto.type = typeBulto;
-                        newBulto.target = target;
+                        newBulto.targetStorageLocation = target;
                         newBulto.quantity = parseInt(bultos);
                         //A este arreglo le añadimos el nuevo bulto
                         aPallets.push(newBulto);
@@ -1277,74 +1694,75 @@ sap.ui.define([
             //TODO: debemos redifinir esta funcion con los nuevos requerimientos
             createOrder: async function () {
                 let that = this;
-                let oInfoData = this.getView().getModel(Constants.model.infoModel).getData();
-                let codeFreight = Math.trunc(Math.round(Math.random() * (9999999 - 1) + 1));
-                let freightOrder = this.getView().getModel(Constants.model.orderModel).getData();
-                console.log(await this.createBody());
-                // freightOrder.pallets.forEach(pallet => {
-                //     pallet.item.forEach(item => {
-                //         delete item["selected"];
-                //         delete item["editable"];
-                //     });
-                // });
-                // let json = {
-                //     driver: {
-                //         name: oInfoData.nameT,
-                //         license: oInfoData.license
-                //     },
-                //     vehicle: {
-                //         plate: oInfoData.plate,
-                //         weight: oInfoData.transport.EX_NOINDIVRES.replace(",",".").trim(),
-                //         type: oInfoData.transport.EX_NAME
-                //     },
-                //     freightOrder: {
-                //         code: codeFreight.toString(),
-                //         date: oInfoData.startDate,
-                //         observations: oInfoData.obs,
-                //         quantityPackage: parseInt(oInfoData.countPallets),
-                //         totalWeight: oInfoData.totalWeight.toString(),
-                //         package: freightOrder.pallets                        
-                //     }
-                // }
-                // // this.postCreateFreightOrder(json);
-                // MessageBox.confirm("Are you sure that you want to finish this order?", {
-                //     onClose: function (oAction) {
-                //         if (oAction === MessageBox.Action.OK) {
-                //             // MessageToast.show("Freight Order: " + Math.round(Math.random() * (9999999 - 1) + 1), {duration:2000});
-                //             MessageBox.success(`Your freight order was created successfully
-                //             `+ `Your number order is: ` + Math.trunc(Math.round(Math.random() * (9999999 - 1) + 1),
-                //                 { title: 'Success!' }),
-                //                 {
-                //                     onClose: function (oAction) {
-                //                         let oData = {
-                //                             pallets: []
-                //                         }
-                //                         let oModel = new JSONModel(oData);
-                //                         that.getView().setModel(oModel, "orderModel");
-                //                         that.getView().getModel("Info").setProperty("/countPallets", 0);
-                //                         let tab = that.byId("idIconTabBarMulti");
-                //                         tab.setSelectedKey("gd");
-                //                     }
-                //                 }
-                //             );
-
-                //         }
-                //     }
-                // });
+                MessageBox.confirm(that._get_i18n("dialog_msg_16"), {
+                    onClose: async function (oAction) {
+                        if (oAction === MessageBox.Action.OK) {
+                            let oInfoData = that.getView().getModel(Constants.model.infoModel).getData();
+                            let codeFreight = Math.trunc(Math.round(Math.random() * (9999999 - 1) + 1));
+                            let freightOrder = that.getView().getModel(Constants.model.orderModel).getData();
+                            let source = that.getView().getModel(Constants.model.filterModel).getProperty(Constants.properties.filterModel.property1);
+                            let json = await that.createBody();
+                            console.log(json);
+                            let status = await that.postFreightOrder(json, freightOrder.pallets);
+                            if (status[0] == "Success") {
+                                freightOrder.pallets.forEach(pallet => {
+                                    pallet.item.forEach(item => {
+                                        delete item["selected"];
+                                        delete item["editable"];
+                                        delete item["status"];
+                                        delete item["EX_SAKTO"];
+                                        delete item["EX_MJAHR"];
+                                    });
+                                });
+                                let jsonCAP = {
+                                    driver: {
+                                        name: oInfoData.nameT,
+                                        license: oInfoData.license,
+                                    },
+                                    vehicle: {
+                                        plate: oInfoData.plate,
+                                        weight: oInfoData.transport.EX_NOINDIVRES.replace(",",".").trim(),
+                                        type: oInfoData.transport.EX_NAME,
+                                        brand: oInfoData.brand
+                                    },
+                                    freightOrder: {
+                                        code: codeFreight.toString(),
+                                        date: oInfoData.startDate,
+                                        status: "Success",
+                                        observations: oInfoData.obs,
+                                        quantityPackage: parseInt(oInfoData.countPallets),
+                                        totalWeight: oInfoData.totalWeight.toString(),
+                                        sourceStorageLocation: source,
+                                        package: freightOrder.pallets,                        
+                                    }
+                                };
+                                console.log(jsonCAP);
+                                await that.postCreateFreightOrder(jsonCAP);
+                                that._buildDialogFinish(that._get_i18n("dialog_success"), "Success", status[1]).open();
+                            } else {
+                                that._buildDialogFinish(that._get_i18n("dialog_error"), "Error", status[1]).open();
+                            }
+                        } 
+                    }
+                });
             },
 
             filterGD: async function () {
                 var that = this;
+                let sFragmentId = this.getView().createId(Constants.ids.icontabfilter_gd.id);
+                let oSwitch = sap.ui.core.Fragment.byId(sFragmentId, Constants.ids.icontabfilter_gd.idSwitchProcessed);
+                oSwitch.setState(false)
                 if (that._validaFiltros().length > 0) {
                     that._buildDialog(that._get_i18n("dialog_error"), "Error", that._get_i18n("dialog_msg_4") + " \n" + that._validaFiltros()).open();
                 } else {
                     let oData = this.getView().getModel(Constants.model.filterModel).getData();
                     let sTypeGD = this.getView().getModel(Constants.model.infoModel).getProperty(Constants.properties.infoModel.property9);
-                    this.getCentroCosto(oData.EX_WERKS);
+                    this.oLoaderData.open();
+                    await this.getCentroCosto(oData.EX_WERKS);
                     let response = await this.getMaterialsSRV(oData.EX_WERKS, oData.IN_BUDAT_MKPF_FROM, oData.IN_BUDAT_MKPF_TO, oData.EX_LGORT, oData.EX_LIFNR, sTypeGD);
-                    this.getCentroCosto(oData.EX_WERKS);
                     let oModel = new JSONModel();
                     this.getOwnerComponent().setModel(oModel, Constants.model.guideModel);
+                    this.oLoaderData.close();
                     if (response != "E") {
                         this.closeDialog();
                     }
@@ -1416,6 +1834,9 @@ sap.ui.define([
             },
 
             cerrarOrder: function () {
+                let sFragmentId = this.getView().createId(Constants.ids.icontabfilter_infoT.id);
+                let oButtonComplete = sap.ui.core.Fragment.byId(sFragmentId, Constants.ids.icontabfilter_infoT.buttonComplete);
+                oButtonComplete.setEnabled(true);
                 let tab = this.byId(Constants.ids.mainView.iconTabBar);
                 tab.setSelectedKey(Constants.model.infoTModel);
             },
@@ -1436,8 +1857,20 @@ sap.ui.define([
                 oTextArea.setValueState(sState);
             },
             createBody: async function () {
+                this.oLoaderData.open();
                 let oHeaderData = await this.getHeaderData();
                 let freightOrder = this.getView().getModel(Constants.model.orderModel).getData();
+                let deliveryOrders = [];
+                freightOrder.pallets.forEach(oPackage => {
+                    oPackage.item.forEach(item => {
+                        deliveryOrders.push(item.deliveryOrder);
+                    });                   
+                });
+                let countPackage = this.getView().getModel(Constants.model.infoModel).getProperty(Constants.properties.infoModel.property2);
+                const dataArr = new Set(deliveryOrders);
+                let result = [...dataArr];
+                let IN_LINE_NUMBER_MD = result.length / oHeaderData.value[0].parameter.find(parameter => parameter.name == "LINE_NUMBER_MD").value;
+                IN_LINE_NUMBER_MD = Math.ceil(IN_LINE_NUMBER_MD);
                 let oBody = {
                     IN_PACKAGE: "1",
                     IN_COMP_CODE: oHeaderData.value[0].parameter.find(parameter => parameter.name == "COMP_CODE").value,
@@ -1448,28 +1881,42 @@ sap.ui.define([
                     IN_MATERIAL_FREE_TEXT: oHeaderData.value[0].parameter.find(parameter => parameter.name == "MATERIAL_FREE_TEXT").value,
                     IN_COST_CENTER_CONS: "",
                     IN_SHIP_POINT: oHeaderData.value[0].parameter.find(parameter => parameter.name == "SHIP_POINT").value,
+                    IN_LINE_NUMBER_MD: IN_LINE_NUMBER_MD.toString(),
+                    IN_PACKAGE_QUANTITY: countPackage.toString(),
+                    IN_MJAHR: "",
                     EX_RESULTADO_EJECUCION: "",
                     EX_DSC_EJECUCION: "",
                     EX_USR_EJECUCION: "",
-                    ZTM_CM_FREIGHT_HEADER_POSITION: this.createItems(freightOrder),
+                    ZTM_CM_FREIGHT_HEADER_POSITION: this.createItems(freightOrder, oHeaderData.value[0].parameter.find(parameter => parameter.name == "LINE_NUMBER_MD").value, oHeaderData.value[0].parameter.find(parameter => parameter.name == "MATERIAL_FREE_TEXT").value),
                     ZTM_CM_FREIGHT_HEADER_RESULT: [
                         {
                             IN_PACKAGE: "",
                             EX_RESULTADO_EJECUCION: "",
                             EX_DSC_EJECUCION: "",
                             EX_USR_EJECUCION: "",
-                            EX_STEP: ""
+                            EX_STEP: "",
+                            EX_TYPE: "",
+                            EX_ID: "",
+                            EX_NUMBER: "",
+                            EX_MESSAGE_V1: "",
+                            EX_MESSAGE_V2: ""
                         }
                     ]
                 };
+                this.oLoaderData.close();
                 return oBody;
             },
-            createItems: function (oData) {
+            createItems: function (oData, corte, MATERIAL_FREE_TEXT) {
                 let items = [];
-                let count = 10;
+                let count = "10";
                 let IN_PLANT = this.getView().getModel(Constants.model.filterModel).getProperty(Constants.properties.filterModel.property3);
                 let IN_SUPPL_STLOC = this.getView().getModel(Constants.model.filterModel).getProperty(Constants.properties.filterModel.property1);
                 let IN_ACCTASSCAT = this.getView().getModel(Constants.model.infoModel).getProperty(Constants.properties.infoModel.property9) == "X" ? "K" : "";
+                let IN_OUTBOUND_DELIVERY = 1;
+                let deliveryOrderAnt = "";
+                let difCount = 0;
+                let dataStorage = this.getOwnerComponent().getModel(Constants.model.storageModel).getData();
+                let repetidos = [];
                 oData.pallets.forEach(oPackage => {
                     let dataType = this.getOwnerComponent().getModel(Constants.model.typeBultosModel).getData();
                     let IN_TRANS_GRP = "";
@@ -1478,34 +1925,150 @@ sap.ui.define([
                             IN_TRANS_GRP = type.EX_TRAGR;
                         }
                     });
-                    count = count.toString();
-                    if (count.length == 2) {
-                        count = "00" + count;
-                    } else if (count.length == 3) {
-                        count = "0" + count;
-                    }
+                    let target = oPackage.targetStorageLocation;
+                    dataStorage.forEach(storage => {
+                        if (storage.EX_LGOBE == target){
+                            target = storage.EX_LGORT;
+                        }
+                    });
                     oPackage.item.forEach(item => {
+                        if (count.length == 2) {
+                            count = "00" + count;
+                        } else if (count.length == 3) {
+                            count = "0" + count;
+                        }
+                        let deliveryOrder = item.deliveryOrder;
+                        if (deliveryOrderAnt != deliveryOrder){
+                            difCount = difCount + 1;
+                            if (difCount > corte) {
+                                difCount = 1;
+                                IN_OUTBOUND_DELIVERY = IN_OUTBOUND_DELIVERY + 1;
+                            }
+                        }
+                        let IN_FLAG_FREE_TEXT = "";
+                        if (item.materialCode == MATERIAL_FREE_TEXT){
+                            IN_FLAG_FREE_TEXT = "X";
+                        }
                         let newItem = {
                             IN_PACKAGE: oPackage.code,
+                            IN_PACKAGE_QUANTITY: oPackage.quantity.toString(),
+                            IN_PACKAGE_WEIGHT: oPackage.weight.toString(),
+                            IN_PACKAGE_TYPE: IN_TRANS_GRP,
+                            IN_OUTBOUND_DELIVERY: IN_OUTBOUND_DELIVERY.toString(),
                             IN_PO_ITEM: count,
                             IN_MATERIAL: item.materialCode,
                             IN_PLANT: IN_PLANT,
-                            IN_STGE_LOC: oPackage.target,
+                            IN_STGE_LOC: target,
                             IN_QUANTITY: item.quantity.toString(),
+                            IN_ERFME: item.unitMeasure,
                             IN_SUPPL_STLOC: IN_SUPPL_STLOC,
                             IN_TRACKINGNO: item.deliveryOrder,
                             IN_PREQ_NAME: item.code,
                             IN_SHORT_TEXT: item.description,
                             IN_ACCTASSCAT: IN_ACCTASSCAT,
                             IN_GL_ACCOUNT: "",
+                            IN_SAKTO: item.EX_SAKTO,
+                            IN_MJAHR: item.EX_MJAHR,
                             IN_COST_CENTER: item.ceco,
-                            IN_TRANS_GRP: IN_TRANS_GRP
+                            IN_TRANS_GRP: IN_TRANS_GRP,
+                            IN_FLAG_FREE_TEXT: IN_FLAG_FREE_TEXT
                         };
                         items.push(newItem);
-                        count = count + 10;
+                        count = (parseInt(count) + 10).toString();
+                        deliveryOrderAnt = deliveryOrder;
                     });
                 });
                 return items;
+            },
+            showProcessed: function (oEvent) {
+                let oData = this.getOwnerComponent().getModel(Constants.model.gdModel).getData()
+                if (oEvent.getSource().getProperty("state")){
+                    oData.forEach(GD => {
+                        if (GD.status == "processed"){
+                            GD.visible = true;
+                        }
+                    });
+                } else {
+                    oData.forEach(GD => {
+                        if (GD.status == "processed"){
+                            GD.visible = false;
+                        }
+                    });
+                }
+                let sFragmentId = this.getView().createId(Constants.ids.icontabfilter_gd.id);
+                let oList = sap.ui.core.Fragment.byId(sFragmentId, Constants.ids.icontabfilter_gd.list);
+                if (oList.getSelectedItem() != undefined) {
+                    oList.getSelectedItem().setSelected(false);
+                    let oModel = new JSONModel();
+                    this.getOwnerComponent().setModel(oModel, Constants.model.guideModel);
+                }
+                this.getOwnerComponent().getModel(Constants.model.gdModel).setData(oData);                      
+            },
+            showLogs: async function (oEvent) {
+                let type = oEvent.getSource().getType();
+                let path = oEvent.getSource().getParent().getBindingContext(Constants.model.guideModel).getPath();
+                let item = this.getOwnerComponent().getModel(Constants.model.guideModel).getProperty(path);
+                let gd =  this.getOwnerComponent().getModel(Constants.model.guideModel).getProperty(Constants.properties.guideModel.property1);
+                let code =  item.code;
+                let msg = "";
+                this.oLoaderData.open();
+                let logs = await this.getLog(code, gd);
+                let that = this;
+                let errors = {
+                    STO: [],
+                    CGR: [],
+                    COD: []
+                }
+                logs.forEach(log => {
+                    switch (log.step) {
+                        case "STO":
+                            errors.STO.push(log.msg);
+                            break;
+                        case "CGR":
+                            errors.CGR.push(log.msg);
+                            break;
+                        case "COD":
+                            errors.COD.push(log.msg);
+                            break;
+                        default:
+                            break;
+                    }
+                });
+                if (errors.STO.length > 0) {
+                    msg = msg + that._get_i18n("STO") + ":\n\n"
+                    errors.STO.forEach(error => {
+                        msg = msg + " - " + error + "\n";
+                    });
+                    msg = msg + "\n";
+                } else {
+                    msg = msg + that._get_i18n("STO") + ": " + that._get_i18n("dialog_msg_14") + "\n\n";
+                }
+                if (errors.CGR.length > 0) {
+                    msg = msg + that._get_i18n("CGR") + ":\n\n"
+                    errors.CGR.forEach(error => {
+                        msg = msg + " - " + error + "\n";
+                    });
+                    msg = msg + "\n";
+                } else {
+                    msg = msg + that._get_i18n("CGR") + ": " + that._get_i18n("dialog_msg_14") + "\n\n";
+                }
+                if (errors.COD.length > 0) {
+                    msg = msg + that._get_i18n("COD") + ":\n\n"
+                    errors.COD.forEach(error => {
+                        msg = msg + " - " + error + "\n";
+                    });
+                    msg = msg + "\n";
+                } else {
+                    msg = msg + that._get_i18n("COD") + ": " + that._get_i18n("dialog_msg_14") + "\n\n";
+                }
+                if (type == "Accept") {
+                    this.oLoaderData.close();
+                    this._buildDialog(this._get_i18n("dialog_success"), "Success", msg).open();
+                } else {
+                    msg = msg + this._get_i18n("dialog_msg_17");
+                    this.oLoaderData.close();
+                    this._buildDialog(this._get_i18n("dialog_error"), "Error", msg).open();
+                }
             }
 
         });

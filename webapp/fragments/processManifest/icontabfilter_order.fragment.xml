@@ -22,7 +22,7 @@
                                     <OverflowToolbar>
                                         <Title text="{i18n>titlePanels} {orderModel>code}"/>
                                         <ToolbarSpacer />
-                                        <Text text="{i18n>quantity}: {orderModel>quantity} - {i18n>typePackage}: {orderModel>type} - {i18n>storageLocationTarget}: {orderModel>target}" />
+                                        <Text text="{i18n>quantity}: {orderModel>quantity} - {i18n>typePackage}: {orderModel>type} - {i18n>storageLocationTarget}: {orderModel>targetStorageLocation}" />
                                         <ToolbarSpacer />
                                         <Text text="{i18n>weight}: {orderModel>weight} {i18n>unitWeight} -" />
                                         <Text text="{i18n>countItems}: {orderModel>quantityItem}" />                      

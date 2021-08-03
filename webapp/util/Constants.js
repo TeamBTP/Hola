@@ -19,7 +19,9 @@ sap.ui.define([
                 centroModel: "centroModel",
                 carrierModel: "carrierModel",
                 typeBultosModel: "typeBultosModel",
-                headerModel: "headerModel"
+                headerModel: "headerModel",
+                logsModel: "logsModel",
+                sourceStorageModel: "sourceStorageModel"
             },
             json: {
                 gdd: "GDD.json",
@@ -51,7 +53,9 @@ sap.ui.define([
                 guideModel: {
                     property1: "/deliveryOrder",
                     property2: "/provider",
-                    property3: "/date"
+                    property3: "/date",
+                    property4: "/code",
+                    property5: "/EX_MJAHR"
                 },
                 infoModel: {
                     property1: "/countItems",
@@ -96,7 +100,9 @@ sap.ui.define([
                 icontabfilter_gd:{
                     id: "idFragmentITFGD",
                     list: "idListGD",
-                    table: "idTableDetailGuide"
+                    table: "idTableDetailGuide",
+                    columnCeco: "idColumnCeco",
+                    idSwitchProcessed: "idSwitchProcessed"
                 },
                 icontabfilter_bulto:{
                     id: "idFragmentITFBulto",
@@ -113,6 +119,10 @@ sap.ui.define([
                 icontabfilter_order:{
                     id: "idFragmentITFOrder",
                     buttonClose: "idButtonClose"
+                },
+                icontabfilter_infoT:{
+                    id: "idFragmentITFInfoT",
+                    buttonComplete: "idButtonComplete"
                 }
             },
             routes: {

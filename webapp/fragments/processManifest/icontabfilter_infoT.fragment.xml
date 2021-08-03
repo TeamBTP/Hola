@@ -75,7 +75,7 @@
                                 </f:FormContainer>
                             </f:formContainers>
                         </f:Form>
-                        <Button icon="sap-icon://complete" press="createOrder" type="Accept" text="{i18n>complete}"/>
+                        <Button icon="sap-icon://complete" id="idButtonComplete" enabled="false" press="createOrder" type="Accept" text="{i18n>generate}"/>
                     </VBox>
                 </content>
             </Panel>

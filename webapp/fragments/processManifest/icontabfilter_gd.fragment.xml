@@ -32,8 +32,11 @@
                                 <Column >
                                     <Text text="{i18n>precio}" />
                                 </Column>
-                                <Column >
+                                <Column id="idColumnCeco">
                                     <Text text="{i18n>ceco}" />
+                                </Column>
+                                <Column >
+                                    <Text text="{i18n>status}" />
                                 </Column>
                             </columns>
                             <!-- Filas de la tabla, se hace una por cada item del array entregado en la propiedad "items" de Table -->
@@ -50,6 +53,7 @@
                                             number="{path:'guideModel>price'}"
                                             unit="{guideModel>currency}" />
                                         <Text text="{guideModel>ceco}"></Text>
+                                        <Button icon="{guideModel>icon}" type="{guideModel>type}" press="showLogs" visible="{guideModel>status}"/>
                                     </cells>
                                 </ColumnListItem>
                             </items>
@@ -63,14 +67,26 @@
                             <!-- Buscador y filtro de guias -->
                             <OverflowToolbar>
                                 <SearchField width="80%" placeholder="{i18n>search}" liveChange="onSearch"/>
-                                <Button icon="sap-icon://filter" press="createFilterDialog"></Button>                     
+                                <Button icon="sap-icon://filter" press="createFilterDialog"></Button>
                             </OverflowToolbar>
                         </subHeader>
                         <content>
+                            <OverflowToolbar>
+                                <ToolbarSpacer />
+                                <HBox alignContent="Center" alignItems="Center" justifyContent="Center">
+                                    <Text text="{i18n>showProcessed}: "/>
+                                    <Switch state="false" id="idSwitchProcessed" change="showProcessed">
+                                        <layoutData>
+                                            <FlexItemData growFactor="1" />
+                                        </layoutData>
+                                    </Switch>
+                                </HBox>
+                                <ToolbarSpacer /> 
+                            </OverflowToolbar>
                             <!-- Lista de guias de despacho -->
                             <List id="idListGD" class="sapUiLargeMarginBottom" items="{path:'GD>/', sorter: {path:'provider'}}" mode="SingleSelect" selectionChange="selectGD">
                                 <items>
-                                    <StandardListItem title="{GD>provider}" description="{GD>deliveryOrder}" info="{path: 'GD>date', formatter: '.Formatter.formatDate'}"></StandardListItem>
+                                    <StandardListItem highlight="{GD>highlight}" visible="{GD>visible}" title="{GD>provider}" description="{GD>deliveryOrder}" info="{path: 'GD>date', formatter: '.Formatter.formatDate'}"></StandardListItem>
                                 </items>
                             </List>
                         </content>
